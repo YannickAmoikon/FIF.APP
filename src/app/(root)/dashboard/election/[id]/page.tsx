@@ -95,7 +95,7 @@ export default function ElectionDetailsPage() {
                             icon={<User size={24}/>}
                         />
                         <ElectionDetailsStatCard
-                            title="Total votants"
+                            title="Total électeurs"
                             value="230"
                             icon={<Users size={24}/>}
                         />

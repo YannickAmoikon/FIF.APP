@@ -10,7 +10,7 @@ import {
 import {
     MoreHorizontal,
     Settings2,
-    FilePenLine, Trash
+    FilePenLine, Trash, Loader2
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
@@ -22,7 +22,7 @@ const mockElections = [
         type: "Public",
         dateDebut: "2024-05-01 08:00",
         dateFin: "2024-05-01 18:00",
-        statut: "Bientôt"
+        statut: "En cours"
     },
     {
         id: "EL002",
