@@ -7,148 +7,139 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Trash2Icon, CheckIcon, X, Pencil, Eye } from "lucide-react";
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from "@/components/ui/dialog";
-import { useToast } from "@/hooks/use-toast";
-import * as z from "zod";
-import { Election as ElectionType } from "@/types/election";
-import UpdateElectionDialog from "./UpdateElectionDialog";
+    MoreHorizontal,
+    Settings2,
+    FilePenLine, Trash
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { format } from "date-fns";
-import { fr } from "date-fns/locale";
+import Link from "next/link";
 
-const formSchema = z.object({
-    titre: z.string().min(1, { message: "Le titre est requis" }),
-    description: z.string().min(1, { message: "La description est requise" }),
-    dateDebut: z.string().min(1, { message: "La date de début est requise" }),
-    dateFin: z.string().min(1, { message: "La date de fin est requise" }),
-    type: z.string().min(1, { message: "Le type est requis" }),
-});
-
-type FormValues = z.infer<typeof formSchema>;
-
-interface ElectionRowProps {
-    election: ElectionType;
-    onDelete: (id: string) => void;
-    triggerRefresh: (action: string) => void;
-}
-
-export const ElectionRow: React.FC<ElectionRowProps> = ({ election, onDelete, triggerRefresh }) => {
-    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false);
-    const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false);
-    const { toast } = useToast();
-
-    const handleElectionEdited = (success: boolean, message: string) => {
-        if (success) {
-            triggerRefresh('update');
-        }
+const mockElections = [
+    {
+        id: "EL001",
+        titre: "Élection Présidentielle FIF 2024",
+        type: "Public",
+        dateDebut: "2024-05-01 08:00",
+        dateFin: "2024-05-01 18:00",
+        statut: "Bientôt"
+    },
+    {
+        id: "EL002",
+        titre: "Élection des Membres du Comité Exécutif",
+        type: "Mixte",
+        dateDebut: "2024-04-15 09:00",
+        dateFin: "2024-04-15 17:00",
+        statut: "En cours"
+    },
+    {
+        id: "EL003",
+        titre: "Élection des Représentants Régionaux",
+        type: "Privé",
+        dateDebut: "2024-03-01 08:00",
+        dateFin: "2024-03-01 16:00",
+        statut: "Terminée"
+    },
+    {
+        id: "EL004",
+        titre: "Vote Commission Technique",
+        type: "Mixte",
+        dateDebut: "2024-06-10 10:00",
+        dateFin: "2024-06-10 15:00",
+        statut: "Bientôt"
+    },
+    {
+        id: "EL005",
+        titre: "Élection Commission des Arbitres",
+        type: "Privé",
+        dateDebut: "2024-02-15 09:00",
+        dateFin: "2024-02-15 17:00",
+        statut: "Terminée"
+    },
+    {
+        id: "EL006",
+        titre: "Élection du Conseil de Discipline",
+        type: "Privé",
+        dateDebut: "2024-07-20 09:00",
+        dateFin: "2024-07-20 16:00",
+        statut: "Bientôt"
+    },
+    {
+        id: "EL007",
+        titre: "Vote Commission Marketing",
+        type: "Public",
+        dateDebut: "2024-08-05 08:00",
+        dateFin: "2024-08-05 17:00",
+        statut: "Bientôt"
+    },
+    {
+        id: "EL008",
+        titre: "Élection Commission des Jeunes",
+        type: "Mixte",
+        dateDebut: "2024-04-01 09:00",
+        dateFin: "2024-04-01 18:00",
+        statut: "Terminée"
+    },
+    {
+        id: "EL009",
+        titre: "Vote Commission Médicale",
+        type: "Privé",
+        dateDebut: "2024-09-15 10:00",
+        dateFin: "2024-09-15 16:00",
+        statut: "Bientôt"
+    },
+];
+const getStatusBadge = (status: string) => {
+    const statusStyles = {
+        'Bientôt': 'text-white flex justify-center border hover:text-red-600 bg-red-500 border-red-600 w-20 border',
+        'En cours': 'text-white flex justify-center border hover:text-gray-600 bg-gray-600 border-gray-600 w-20 animate-pulse border',
+        'Terminée': 'text-white flex justify-center border hover:text-green-600 bg-green-600 border-green-600 w-20'
     };
+    return statusStyles[status as keyof typeof statusStyles];
+};
 
-    const handleDelete = () => {
-        onDelete(election.id.toString());
-        triggerRefresh('delete');
-    };
-
-    const getStatusBadge = (status: string) => {
-        const statusStyles = {
-            'À venir': 'bg-blue-100 text-blue-800',
-            'En cours': 'bg-green-100 text-green-800',
-            'Terminée': 'bg-gray-100 text-gray-800'
-        };
-        return (
-            <Badge className={`${statusStyles[status as keyof typeof statusStyles]} rounded-sm`}>
-                {status}
-            </Badge>
-        );
-    };
-
+export const ElectionRow = () => {
     return (
-        <TableRow>
-            <TableCell className="text-left">{election.id}</TableCell>
-            <TableCell className="text-left font-medium">{election.titre}</TableCell>
-            <TableCell className="text-left">{election.type}</TableCell>
-            <TableCell className="text-left">
-                {format(new Date(election.dateDebut), 'dd/MM/yyyy HH:mm', { locale: fr })}
-            </TableCell>
-            <TableCell className="text-left">
-                {format(new Date(election.dateFin), 'dd/MM/yyyy HH:mm', { locale: fr })}
-            </TableCell>
-            <TableCell className="text-center">
-                {getStatusBadge(election.statut)}
-            </TableCell>
-            <TableCell className="text-right">
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                            <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                        <DropdownMenuItem>
-                            <Eye className="mr-1" size={14} />
-                            Voir les détails
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onSelect={() => setIsEditDialogOpen(true)}>
-                            <Pencil className="mr-1" size={14} />
-                            Modifier
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                            onSelect={() => setIsDeleteDialogOpen(true)}
-                            className="text-red-600"
-                        >
-                            <Trash2Icon className="mr-1" size={14} />
-                            Supprimer
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-
-                <UpdateElectionDialog
-                    election={election}
-                    open={isEditDialogOpen}
-                    onOpenChange={setIsEditDialogOpen}
-                    onElectionEdited={handleElectionEdited}
-                />
-
-                {/* Dialog de suppression */}
-                <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-                    <DialogContent>
-                        <DialogHeader>
-                            <DialogTitle>Confirmation de suppression</DialogTitle>
-                            <DialogDescription>
-                                Êtes-vous sûr de vouloir supprimer cette élection ?
-                            </DialogDescription>
-                        </DialogHeader>
-                        <DialogFooter>
-                            <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => setIsDeleteDialogOpen(false)}
-                            >
-                                <X className="mr-1" size={14} />
-                                Annuler
-                            </Button>
-                            <Button
-                                size="sm"
-                                className="bg-green-600 hover:bg-green-700 text-white"
-                                onClick={() => {
-                                    handleDelete();
-                                    setIsDeleteDialogOpen(false);
-                                }}
-                            >
-                                <CheckIcon className="mr-1" size={14} />
-                                Confirmer
-                            </Button>
-                        </DialogFooter>
-                    </DialogContent>
-                </Dialog>
-            </TableCell>
-        </TableRow>
+        <>
+            {mockElections.map((election) => (
+                <TableRow key={election.id}>
+                    <TableCell className="text-left w-[10%]">{election.id}</TableCell>
+                    <TableCell className="text-left font-medium w-[30%]">{election.titre}</TableCell>
+                    <TableCell className="text-left w-[10%]">{election.type}</TableCell>
+                    <TableCell className="text-left w-[15%]">{election.dateDebut}</TableCell>
+                    <TableCell className="text-left w-[15%]">{election.dateFin}</TableCell>
+                    <TableCell className="text-center w-[10%]">
+                        <Badge variant="secondary" className={`${getStatusBadge(election.statut)} rounded-sm cursor-pointer`}>
+                            {election.statut}
+                        </Badge>
+                    </TableCell>
+                    <TableCell className="text-right w-[10%]">
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" className="h-8 w-8 p-0">
+                                    <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuItem>
+                                    <FilePenLine className="mr-1" size={14} />
+                                    Modifier
+                                </DropdownMenuItem>
+                                <Link href={`/dashboard/election/${election.id}?title=${election.titre}`}>
+                                    <DropdownMenuItem>
+                                        <Settings2 className="mr-1" size={14} />
+                                        Organiser
+                                    </DropdownMenuItem>
+                                </Link>
+                                <DropdownMenuItem className="text-red-600">
+                                    <Trash className="mr-1" size={14} />
+                                    Supprimer
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </TableCell>
+                </TableRow>
+            ))}
+        </>
     );
 };
