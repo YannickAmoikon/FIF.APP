@@ -1,4 +1,3 @@
-import Image from "next/image";
 import {Button} from "@/components/ui/button";
 import {Play} from "lucide-react";
 import Link from "next/link";

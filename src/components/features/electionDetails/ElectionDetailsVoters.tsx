@@ -28,7 +28,7 @@ export default function ElectionDetailsVoters() {
                                 <div className="w-12 h-12 border-2 bg-secondary rounded-full" />
                                 <div>
                                     <h4 className="font-medium">Electeur {i}</h4>
-                                    <p className="text-sm text-gray-500">Parti politique</p>
+                                    <p className="text-sm text-gray-500">Je mettrais une info pertinente</p>
                                 </div>
                             </div>
                         </Card>

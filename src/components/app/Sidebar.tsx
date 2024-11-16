@@ -7,9 +7,8 @@ import { usePathname } from "next/navigation";
 import {
     LayoutDashboard,
     LogOut,
-    Vote,
     Info,
-    AlertTriangle, Check
+    AlertTriangle, Check, BookMarked
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import {
@@ -24,7 +23,7 @@ import { Button } from "@/components/ui/button";
 
 const items = [
     { title: "Tableau de bord", url: "/dashboard", icon: LayoutDashboard },
-    { title: "Élections", url: "/dashboard/election", icon: Vote },
+    { title: "Élections", url: "/dashboard/election", icon: BookMarked },
 ];
 
 export default function SideBar({ className = "" }: { className?: string }) {

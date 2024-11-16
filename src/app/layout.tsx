@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
 import "../styles/globals.css";
 import LocalFont from 'next/font/local'
 import {Providers} from "@/components/providers/providers";
@@ -19,6 +18,9 @@ const fontMono = LocalFont({
 export const metadata: Metadata = {
   title: "FIF - Accueil",
   description: "Page d'accueil de 'application",
+  icons: {
+    icon: "/logo.png"
+  }
 };
 
 export default function RootLayout({

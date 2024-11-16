@@ -91,9 +91,9 @@ const mockElections = [
 ];
 const getStatusBadge = (status: string) => {
     const statusStyles = {
-        'Bientôt': 'text-white flex justify-center border hover:text-red-600 bg-red-500 border-red-600 w-20 border',
-        'En cours': 'text-white flex justify-center border hover:text-gray-600 bg-gray-600 border-gray-600 w-20 animate-pulse border',
-        'Terminée': 'text-white flex justify-center border hover:text-green-600 bg-green-600 border-green-600 w-20'
+        'Bientôt': 'flex justify-center border text-red-400 border-red-400 w-20',
+        'En cours': 'flex justify-center border text-gray-600 border-gray-600 w-20 animate-pulse border',
+        'Terminée': 'flex justify-center border text-green-600 border-green-600 w-20'
     };
     return statusStyles[status as keyof typeof statusStyles];
 };

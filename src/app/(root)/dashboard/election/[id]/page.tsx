@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { ElectionDetailsStatCard } from "@/components/features/electionDetails/ElectionDetailsStatCard";
+import { StatCard } from "@/components/app/StatCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
     ArrowLeft, ChartLine, Ellipsis, ThumbsUp, User, Users,
@@ -89,22 +89,22 @@ export default function ElectionDetailsPage() {
 
                 <CardContent className="p-4 h-[calc(100vh-6rem)] flex flex-col">
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-                        <ElectionDetailsStatCard
+                        <StatCard
                             title="Total candidats"
                             value="10"
                             icon={<User size={24}/>}
                         />
-                        <ElectionDetailsStatCard
+                        <StatCard
                             title="Total électeurs"
                             value="230"
                             icon={<Users size={24}/>}
                         />
-                        <ElectionDetailsStatCard
+                        <StatCard
                             title="Taux de progression des votes"
                             value="86 %"
                             icon={<ChartLine size={24}/>}
                         />
-                        <ElectionDetailsStatCard
+                        <StatCard
                             title="Candidat en tête"
                             value="Amoikon Yannick"
                             icon={<UserCheck size={24}/>}

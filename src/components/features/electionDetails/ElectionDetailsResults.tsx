@@ -24,9 +24,9 @@ export default function ElectionDetailsResults() {
 
                 <div className="space-y-4">
                     {[
-                        {name: "DROGBA Didier", votes: 120, percentage: 48},
-                        {name: "KALOU Bonaventure", votes: 85, percentage: 34},
-                        {name: "ZOKORA Didier", votes: 45, percentage: 18}
+                        {name: "AMOIKON Yannick", votes: 120, percentage: 48},
+                        {name: "N'GUESSAN Franck", votes: 85, percentage: 34},
+                        {name: "AMOIKON Eric", votes: 45, percentage: 18}
                     ].map((candidat) => (
                         <div key={candidat.name} className="space-y-2">
                             <div className="flex justify-between text-sm">
