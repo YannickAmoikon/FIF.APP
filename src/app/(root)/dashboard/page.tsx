@@ -24,9 +24,9 @@ export default function DashboardPage() {
                 <CardContent className="p-4 h-[calc(100vh-120px)] flex flex-col">
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                         <StatCard title="Total d'élections" value="9" icon={<BookCopy size={24}/>}/>
-                        <StatCard title="Elections terminées" value="3" icon={<BookCheck size={24}/>}/>
-                        <StatCard title="Elections à venir" value="4" icon={<Book size={24}/>}/>
-                        <StatCard title="Elections en cours" value="2" icon={<BookText size={24}/>}/>
+                        <StatCard title="Élections terminées" value="3" icon={<BookCheck size={24}/>}/>
+                        <StatCard title="Élections à venir" value="4" icon={<Book size={24}/>}/>
+                        <StatCard title="Élections en cours" value="2" icon={<BookText size={24}/>}/>
                     </div>
 
                     <div className="flex-1 mt-4 min-h-0">

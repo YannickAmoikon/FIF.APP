@@ -1,16 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, {useState} from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
-import {
-    LayoutDashboard,
-    LogOut,
-    Info,
-    AlertTriangle, Check, BookMarked
-} from "lucide-react";
-import { signOut } from "next-auth/react";
+import {usePathname, useRouter} from "next/navigation";
+import {AlertTriangle, BookMarked, Check, Info, LayoutDashboard, LogOut} from "lucide-react";
 import {
     Dialog,
     DialogContent,
@@ -19,15 +13,16 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import {Button} from "@/components/ui/button";
 
 const items = [
-    { title: "Tableau de bord", url: "/dashboard", icon: LayoutDashboard },
-    { title: "Élections", url: "/dashboard/election", icon: BookMarked },
+    {title: "Tableau de bord", url: "/dashboard", icon: LayoutDashboard},
+    {title: "Élections", url: "/dashboard/election", icon: BookMarked},
 ];
 
-export default function SideBar({ className = "" }: { className?: string }) {
+export default function SideBar({className = ""}: { className?: string }) {
     const pathname = usePathname();
+    const router = useRouter();
     const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
 
     const isActive = (url: string) => {
@@ -39,13 +34,15 @@ export default function SideBar({ className = "" }: { className?: string }) {
 
     const handleLogout = async () => {
         try {
-            await signOut({ callbackUrl: "/login" });
+            localStorage.removeItem("token")
+            localStorage.removeItem("email")
+            router.push("/")
         } catch (error) {
             console.error("Erreur lors de la déconnexion:", error);
         }
     };
 
-    const LinkItem = ({ item }: { item: (typeof items)[0] }) => (
+    const LinkItem = ({item}: { item: (typeof items)[0] }) => (
         <Link
             href={item.url}
             className={`flex rounded-sm text-sm items-center gap-3 px-3 py-2.5 transition-all
@@ -55,7 +52,7 @@ export default function SideBar({ className = "" }: { className?: string }) {
                     : "text-gray-600 hover:bg-orange-100 font-semibold hover:text-orange-600"
             }`}
         >
-            <item.icon className="h-5 w-5" />
+            <item.icon className="h-5 w-5"/>
             <span>{item.title}</span>
         </Link>
     );
@@ -82,7 +79,7 @@ export default function SideBar({ className = "" }: { className?: string }) {
                 <nav className="flex-1 overflow-auto py-6 px-3">
                     <div className="space-y-1">
                         {items.map((item) => (
-                            <LinkItem key={item.title} item={item} />
+                            <LinkItem key={item.title} item={item}/>
                         ))}
                     </div>
                 </nav>
@@ -97,14 +94,14 @@ export default function SideBar({ className = "" }: { className?: string }) {
                                 : "text-gray-600 hover:bg-orange-100 font-semibold hover:text-orange-600"
                         }`}
                     >
-                        <Info className="h-5 w-5" />
+                        <Info className="h-5 w-5"/>
                         <span>Aide</span>
                     </Link>
                     <button
                         onClick={() => setIsLogoutDialogOpen(true)}
                         className="flex rounded-sm text-sm items-center gap-3 px-3 py-2.5 text-gray-600 hover:bg-orange-100 hover:text-orange-600 transition-all w-full mt-2"
                     >
-                        <LogOut className="h-5 w-5" />
+                        <LogOut className="h-5 w-5"/>
                         <span>Déconnexion</span>
                     </button>
                 </div>
@@ -114,7 +111,7 @@ export default function SideBar({ className = "" }: { className?: string }) {
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">
-                            <AlertTriangle className="h-5 w-5 text-orange-500" />
+                            <AlertTriangle className="h-5 w-5 text-orange-500"/>
                             Confirmation de déconnexion
                         </DialogTitle>
                         <DialogDescription className="pt-2">

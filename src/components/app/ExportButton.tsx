@@ -11,25 +11,35 @@ import {
 } from "@/components/ui/dropdown-menu"
 import {File} from "lucide-react";
 
-export default function ExportElection() {
+interface ExportButtonProps {
+    onExportExcel?: () => void;
+    onExportPDF?: () => void;
+    label?: string;
+}
+
+export default function ExportButton({ 
+    onExportExcel, 
+    onExportPDF, 
+    label = "Format d'export" 
+}: ExportButtonProps) {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button size="sm" className="rounded-sm border" variant="secondary"><File className="mr-1" size={14} /> Export</Button>
+                <Button size="sm" className="rounded-sm border" variant="secondary">
+                    <File className="mr-1" size={14} /> Export
+                </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-36">
-                <DropdownMenuLabel>{"Format d'export"}</DropdownMenuLabel>
+                <DropdownMenuLabel>{label}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
-                    <DropdownMenuItem>
+                    <DropdownMenuItem onClick={onExportExcel}>
                         Excel
-                        <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
                     </DropdownMenuItem>
-                    <DropdownMenuItem>
+                    <DropdownMenuItem onClick={onExportPDF}>
                         PDF
-                        <DropdownMenuShortcut>⌘B</DropdownMenuShortcut>
                     </DropdownMenuItem>
-                  </DropdownMenuGroup>
+                </DropdownMenuGroup>
             </DropdownMenuContent>
         </DropdownMenu>
     )

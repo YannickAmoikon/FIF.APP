@@ -1,40 +1,38 @@
 "use client";
 
-import { useState } from "react";
-import { Toaster } from "@/components/ui/toaster";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { StatCard } from "@/components/app/StatCard";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {useState} from "react";
+import {Toaster} from "@/components/ui/toaster";
+import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card"
+import {StatCard} from "@/components/app/StatCard";
+import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
+import {AlertTriangle, ArrowLeft, ChartLine, Check, Ellipsis, ThumbsUp, User, UserCheck, Users} from "lucide-react";
+import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
+import {Button} from "@/components/ui/button";
 import {
-    ArrowLeft, ChartLine, Ellipsis, ThumbsUp, User, Users,
-    UserCheck, AlertTriangle, Check
-} from "lucide-react";
-import {
-    DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import {
-    Dialog, DialogContent, DialogDescription, DialogFooter,
-    DialogHeader, DialogTitle,
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
 } from "@/components/ui/dialog";
-import { useToast } from "@/hooks/use-toast";
-import { useRouter } from "next/navigation";
+import {useToast} from "@/hooks/use-toast";
+import {useParams, useRouter} from "next/navigation";
 import ElectionDetailsOverViews from "@/components/features/electionDetails/ElectionDetailsOverViews";
 import ElectionDetailsCandidates from "@/components/features/electionDetails/ElectionDetailsCandidates";
 import ElectionDetailsVoters from "@/components/features/electionDetails/ElectionDetailsVoters";
 import ElectionDetailsResults from "@/components/features/electionDetails/ElectionDetailsResults";
-import { useParams } from "next/navigation";
 
 const tabs = [
-    { title: "informations générales", value: "overview" },
-    { title: "liste des candidats", value: "candidates" },
-    { title: "liste des électeurs", value: "voters" },
-    { title: "résultats de l'élection", value: "results" }
+    {title: "informations générales", value: "overview"},
+    {title: "liste des candidats", value: "candidates"},
+    {title: "liste des électeurs", value: "voters"},
+    {title: "résultats de l'élection", value: "results"}
 ];
 
 export default function ElectionDetailsPage() {
     const [isStartDialogOpen, setIsStartDialogOpen] = useState(false);
-    const { toast } = useToast();
+    const {toast} = useToast();
     const router = useRouter();
     const params = useParams();
     const electionId = params?.id as string;
@@ -50,7 +48,7 @@ export default function ElectionDetailsPage() {
 
     return (
         <main className="flex bg-secondary flex-1 h-full">
-            <Toaster />
+            <Toaster/>
             <Card className="flex-1 bg-secondary rounded-none shadow-none border-0">
                 <CardHeader className="border-b flex flex-row items-center justify-between py-4">
                     <div className="flex flex-col space-y-1.5">
@@ -65,12 +63,12 @@ export default function ElectionDetailsPage() {
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button size="sm" variant="secondary" className="border rounded-sm">
-                                    <Ellipsis size={14} />
+                                    <Ellipsis size={14}/>
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-[230px]">
                                 <DropdownMenuItem onClick={() => setIsStartDialogOpen(true)}>
-                                    <ThumbsUp className="mr-1 h-4 w-4" />
+                                    <ThumbsUp className="mr-1 h-4 w-4"/>
                                     <span>Démarrer l'élection</span>
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
@@ -81,7 +79,7 @@ export default function ElectionDetailsPage() {
                             className="border rounded-sm"
                             onClick={() => router.push('/dashboard/election')}
                         >
-                            <ArrowLeft className="mr-1" size={14} />
+                            <ArrowLeft className="mr-1" size={14}/>
                             Retour
                         </Button>
                     </div>
@@ -101,11 +99,11 @@ export default function ElectionDetailsPage() {
                         />
                         <StatCard
                             title="Taux de progression des votes"
-                            value="86 %"
+                            value="100 %"
                             icon={<ChartLine size={24}/>}
                         />
                         <StatCard
-                            title="Candidat en tête"
+                            title="Vainqueur de l'élection"
                             value="Amoikon Yannick"
                             icon={<UserCheck size={24}/>}
                         />
@@ -113,7 +111,8 @@ export default function ElectionDetailsPage() {
 
                     <div className="flex-1 flex flex-col min-h-0">
                         <Tabs defaultValue="overview" className="flex-1 flex border rounded-sm flex-col">
-                            <TabsList className="space-x-2 w-full flex items-center rounded-sm justify-start py-5 border-b border-gray-200">
+                            <TabsList
+                                className="space-x-2 w-full flex items-center rounded-sm justify-start py-5 border-b border-gray-200">
                                 {tabs.map((tab) => (
                                     <TabsTrigger
                                         key={tab.value}
@@ -148,7 +147,7 @@ export default function ElectionDetailsPage() {
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">
-                            <AlertTriangle className="h-5 w-5 text-orange-500" />
+                            <AlertTriangle className="h-5 w-5 text-orange-500"/>
                             Confirmation de démarrage
                         </DialogTitle>
                         <DialogDescription className="pt-2 space-y-2">
@@ -176,7 +175,7 @@ export default function ElectionDetailsPage() {
                             className="bg-green-600 rounded-sm hover:bg-green-700 text-white"
                             onClick={handleStartElection}
                         >
-                            <Check className="mr-1" size={14} />
+                            <Check className="mr-1" size={14}/>
                             Oui
                         </Button>
                     </DialogFooter>

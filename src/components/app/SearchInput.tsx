@@ -4,13 +4,17 @@ import { Input } from '@/components/ui/input';
 interface SearchInputProps {
     value: string;
     onChange: (value: string) => void;
+    placeholder?: string;
 }
 
-export const SearchInput: React.FC<SearchInputProps> = ({ value, onChange }) => (
-    <Input
-        placeholder="Faire une recherche..."
-        className="w-64 rounded-sm focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 focus:border-gray-200"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-    />
-);
+export const SearchInput = ({ value, onChange, placeholder = "Rechercher..." }: SearchInputProps) => {
+    return (
+        <Input
+            type="text"
+            placeholder={placeholder}
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            className="w-[300px] rounded-sm"
+        />
+    );
+};

@@ -1,12 +1,12 @@
 "use client";
 
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import {useForm} from "react-hook-form";
+import {zodResolver} from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { useToast } from "@/hooks/use-toast";
-import { Loader2, Pencil } from "lucide-react";
+import {Button} from "@/components/ui/button";
+import {Input} from "@/components/ui/input";
+import {useToast} from "@/hooks/use-toast";
+import {Pencil} from "lucide-react";
 import {
     Dialog,
     DialogContent,
@@ -15,29 +15,22 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
-import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from "@/components/ui/form";
-import { Textarea } from "@/components/ui/textarea";
-import { Election } from "@/types/election";
+import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage,} from "@/components/ui/form";
+import {Textarea} from "@/components/ui/textarea";
+import {ElectionTypes} from "@/types/election.types";
 
 const formSchema = z.object({
-    titre: z.string().min(1, { message: "Le titre est requis" }),
-    description: z.string().min(1, { message: "La description est requise" }),
-    dateDebut: z.string().min(1, { message: "La date de début est requise" }),
-    dateFin: z.string().min(1, { message: "La date de fin est requise" }),
-    type: z.string().min(1, { message: "Le type est requis" }),
+    titre: z.string().min(1, {message: "Le titre est requis"}),
+    description: z.string().min(1, {message: "La description est requise"}),
+    dateDebut: z.string().min(1, {message: "La date de début est requise"}),
+    dateFin: z.string().min(1, {message: "La date de fin est requise"}),
+    type: z.string().min(1, {message: "Le type est requis"}),
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
 interface UpdateElectionDialogProps {
-    election: Election;
+    election: ElectionTypes;
     open: boolean;
     onOpenChange: (open: boolean) => void;
     onElectionEdited?: (success: boolean, message: string) => void;
@@ -50,7 +43,7 @@ export default function UpdateElectionDialog({
                                                  onOpenChange,
                                                  onElectionEdited
                                              }: UpdateElectionDialogProps) {
-    const { toast } = useToast();
+    const {toast} = useToast();
 
     const form = useForm<FormValues>({
         resolver: zodResolver(formSchema),
@@ -95,7 +88,7 @@ export default function UpdateElectionDialog({
                         <FormField
                             control={form.control}
                             name="titre"
-                            render={({ field }) => (
+                            render={({field}) => (
                                 <FormItem>
                                     <FormLabel>Titre de l'élection</FormLabel>
                                     <FormControl>
@@ -105,7 +98,7 @@ export default function UpdateElectionDialog({
                                             className="w-full rounded-sm"
                                         />
                                     </FormControl>
-                                    <FormMessage />
+                                    <FormMessage/>
                                 </FormItem>
                             )}
                         />
@@ -113,7 +106,7 @@ export default function UpdateElectionDialog({
                         <FormField
                             control={form.control}
                             name="description"
-                            render={({ field }) => (
+                            render={({field}) => (
                                 <FormItem>
                                     <FormLabel>Description</FormLabel>
                                     <FormControl>
@@ -123,7 +116,7 @@ export default function UpdateElectionDialog({
                                             className="w-full rounded-sm resize-none h-24"
                                         />
                                     </FormControl>
-                                    <FormMessage />
+                                    <FormMessage/>
                                 </FormItem>
                             )}
                         />
@@ -132,7 +125,7 @@ export default function UpdateElectionDialog({
                             <FormField
                                 control={form.control}
                                 name="dateDebut"
-                                render={({ field }) => (
+                                render={({field}) => (
                                     <FormItem>
                                         <FormLabel>Date de début</FormLabel>
                                         <FormControl>
@@ -142,7 +135,7 @@ export default function UpdateElectionDialog({
                                                 className="w-full rounded-sm"
                                             />
                                         </FormControl>
-                                        <FormMessage />
+                                        <FormMessage/>
                                     </FormItem>
                                 )}
                             />
@@ -150,7 +143,7 @@ export default function UpdateElectionDialog({
                             <FormField
                                 control={form.control}
                                 name="dateFin"
-                                render={({ field }) => (
+                                render={({field}) => (
                                     <FormItem>
                                         <FormLabel>Date de fin</FormLabel>
                                         <FormControl>
@@ -160,7 +153,7 @@ export default function UpdateElectionDialog({
                                                 className="w-full rounded-sm"
                                             />
                                         </FormControl>
-                                        <FormMessage />
+                                        <FormMessage/>
                                     </FormItem>
                                 )}
                             />
@@ -169,7 +162,7 @@ export default function UpdateElectionDialog({
                         <FormField
                             control={form.control}
                             name="type"
-                            render={({ field }) => (
+                            render={({field}) => (
                                 <FormItem>
                                     <FormLabel>Type d'élection</FormLabel>
                                     <FormControl>
@@ -179,7 +172,7 @@ export default function UpdateElectionDialog({
                                             className="w-full rounded-sm"
                                         />
                                     </FormControl>
-                                    <FormMessage />
+                                    <FormMessage/>
                                 </FormItem>
                             )}
                         />
@@ -191,8 +184,8 @@ export default function UpdateElectionDialog({
                                 className="bg-green-600 text-white hover:bg-green-700 rounded-sm"
                             >
 
-                                        <Pencil className="mr-1" size={14} />
-                                        Modifier
+                                <Pencil className="mr-1" size={14}/>
+                                Modifier
                             </Button>
                         </DialogFooter>
                     </form>

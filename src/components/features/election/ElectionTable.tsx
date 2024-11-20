@@ -1,8 +1,13 @@
 import React from 'react';
 import { Table, TableBody, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ElectionRow } from '@/components/features/election/ElectionRow';
+import { ElectionTypes } from '@/types/election.types';
 
-export const ElectionTable = () => (
+interface ElectionTableProps {
+    data: ElectionTypes[];
+}
+
+export const ElectionTable: React.FC<ElectionTableProps> = ({ data }) => (
     <Table>
         <TableHeader>
             <TableRow>
@@ -16,7 +21,9 @@ export const ElectionTable = () => (
             </TableRow>
         </TableHeader>
         <TableBody>
-            <ElectionRow />
+            {data.map((election) => (
+                <ElectionRow key={election.id} {...election} />
+            ))}
         </TableBody>
     </Table>
 );
