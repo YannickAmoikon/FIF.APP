@@ -1,7 +1,7 @@
 // services/election.services.ts
 import {createApi, fetchBaseQuery} from '@reduxjs/toolkit/query/react';
 import {API_BASE_URL} from '@/config/api';
-import {CreateElectionDto, ElectionResponse, ElectionTypes} from "@/types/election.types";
+import {CreateElectionDto,  ElectionResponse,  ElectionTypes} from "@/types/election.types";
 
 // Créer un baseQuery personnalisé avec le token
 const baseQueryWithAuth = fetchBaseQuery({
@@ -21,8 +21,14 @@ export const electionApi = createApi({
     tagTypes: ['Election'],
     endpoints: (builder) => ({
         // Récupérer toutes les élections
-        getElections: builder.query<ElectionResponse, void>({
-            query: () => 'election/get-all-election',
+        getElections: builder.query<{
+            message: string;
+            data: ElectionResponse[];
+            totalElections: number;
+            page: number;
+            totalPages: number;
+        }, number>({
+            query: (page = 1) => `election/get-all-election?page=${page}`,
             providesTags: ['Election'],
         }),
 
@@ -45,7 +51,7 @@ export const electionApi = createApi({
         // Mettre à jour une élection
         updateElection: builder.mutation<ElectionTypes, { id: number; updates: Partial<ElectionTypes> }>({
             query: ({id, updates}) => ({
-                url: `elections/edit-election?id=${id}`,
+                url: `election/edit-election?id=${id}`,
                 method: 'PUT',
                 body: updates,
             }),

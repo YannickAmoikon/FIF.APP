@@ -1,14 +1,30 @@
 "use client"
 
 import React from "react";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import {TableCell, TableRow} from "@/components/ui/table";
 import {Button} from "@/components/ui/button";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,} from "@/components/ui/dropdown-menu";
 import {FilePenLine, MoreHorizontal, Settings2, Trash} from "lucide-react";
 import {Badge} from "@/components/ui/badge";
 import Link from "next/link";
-import {useDeleteElectionMutation, useGetElectionsQuery} from "@/services/election.services";
-import {ElectionTypes} from "@/types/election.types";
+import {useDeleteElectionMutation} from "@/services/election.services";
+import {useToast} from "@/hooks/use-toast";
+import { ElectionTypes } from "@/types/election.types";
+
+interface ElectionRowProps {
+    elections: ElectionTypes[];
+}
 
 const getStatusBadge = (status: string) => {
     const statusStyles = {
@@ -19,19 +35,27 @@ const getStatusBadge = (status: string) => {
     return statusStyles[status as keyof typeof statusStyles];
 };
 
-export const ElectionRow = () => {
-    const {data, isLoading, isError} = useGetElectionsQuery();
+export const ElectionRow: React.FC<ElectionRowProps> = ({ elections = [] }) => {
     const [deleteElection] = useDeleteElectionMutation();
+    const {toast} = useToast();
 
     const handleDelete = async (id: string) => {
         try {
-            await deleteElection(Number(id));
+            await deleteElection(Number(id)).unwrap();
+            toast({
+                title: "Succès",
+                description: "Élection supprimée avec succès",
+                className: "bg-green-600",
+            });
         } catch (error) {
             console.error('Erreur lors de la suppression', error);
+            toast({
+                title: "Erreur",
+                description: "Erreur lors de la suppression de l'élection",
+                variant: "destructive",
+            });
         }
     };
-
-    const elections = data?.data || [];
 
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
@@ -44,13 +68,27 @@ export const ElectionRow = () => {
         });
     };
 
+    // Vérifier si elections existe et n'est pas vide
+    if (!elections || elections.length === 0) {
+        return null;
+    }
+
+    // Utiliser un Set pour éliminer les doublons basés sur l'ID
+    const uniqueElections = Array.from(
+        new Map(elections.map(election => [election.id, election])).values()
+    );
+
     return (
         <>
-            {elections.map((election) => (
+            {uniqueElections.map((election) => (
                 <TableRow key={election.id}>
                     <TableCell className="text-left w-[10%]">{election.id}</TableCell>
                     <TableCell className="text-left font-medium w-[30%]">{election.title}</TableCell>
-                    <TableCell className="text-left w-[10%]">{election.type === "Private" ? "Privé" : election.type === "Public" ? "Public" : election.type === "Mixt" ? "Mixte" : election.type}</TableCell>
+                    <TableCell className="text-left w-[10%]">
+                        {election.type === "Private" ? "Privé" : 
+                         election.type === "Public" ? "Public" : 
+                         election.type === "Mixt" ? "Mixte" : election.type}
+                    </TableCell>
                     <TableCell className="text-left w-[15%]">
                         {formatDate(election.date_time_start)}
                     </TableCell>
@@ -63,8 +101,8 @@ export const ElectionRow = () => {
                             className={`${getStatusBadge(election.statut)} rounded-sm cursor-pointer`}
                         >
                             {election.statut === 'coming' ? 'À venir' : 
-              election.statut === 'in progress' ? 'En cours' : 
-              election.statut === 'finished' ? 'Terminé' : election.statut}
+                             election.statut === 'in progress' ? 'En cours' : 
+                             election.statut === 'finished' ? 'Terminé' : election.statut}
                         </Badge>
                     </TableCell>
                     <TableCell className="text-right w-[10%]">
@@ -79,19 +117,41 @@ export const ElectionRow = () => {
                                     <FilePenLine className="mr-1" size={14}/>
                                     Modifier
                                 </DropdownMenuItem>
-                                <Link href={`/dashboard/election/${election.id}?title=${election.title}`}>
+                                <Link href={`/dashboard/election/${election.id}?title=${election.title}?status=${election.statut}`}>
                                     <DropdownMenuItem>
                                         <Settings2 className="mr-1" size={14}/>
                                         Organiser
                                     </DropdownMenuItem>
                                 </Link>
-                                <DropdownMenuItem
-                                    className="text-red-600"
-                                    onClick={() => handleDelete(election.id.toString())}
-                                >
-                                    <Trash className="mr-1" size={14}/>
-                                    Supprimer
-                                </DropdownMenuItem>
+                                <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                        <DropdownMenuItem
+                                            className="text-red-600"
+                                            onSelect={(e) => e.preventDefault()}
+                                        >
+                                            <Trash className="mr-1" size={14}/>
+                                            Supprimer
+                                        </DropdownMenuItem>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>Êtes-vous sûr ?</AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                                Cette action est irréversible. Cela supprimera définitivement l'élection
+                                                "{election.title}" et toutes les données associées.
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel>Annuler</AlertDialogCancel>
+                                            <AlertDialogAction
+                                                className="bg-red-600 hover:bg-red-700"
+                                                onClick={() => handleDelete(election.id.toString())}
+                                            >
+                                                Supprimer
+                                            </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
                             </DropdownMenuContent>
                         </DropdownMenu>
                     </TableCell>

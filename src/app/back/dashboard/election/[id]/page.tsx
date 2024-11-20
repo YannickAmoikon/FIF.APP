@@ -1,27 +1,22 @@
 "use client";
 
 import {useState} from "react";
+import {useGetElectionByIdQuery} from "@/services/election.services";
 import {Toaster} from "@/components/ui/toaster";
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card"
 import {StatCard} from "@/components/app/StatCard";
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
-import {AlertTriangle, ArrowLeft, ChartLine, Check, Ellipsis, ThumbsUp, User, UserCheck, Users} from "lucide-react";
+import {AlertTriangle, ArrowLeft, ChartLine, Check, MoreVertical, ThumbsUp, User, UserCheck, Users} from "lucide-react";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
 import {Button} from "@/components/ui/button";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from "@/components/ui/dialog";
+import {Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import {useToast} from "@/hooks/use-toast";
-import {useParams, useRouter} from "next/navigation";
+import {useParams, useRouter, useSearchParams} from "next/navigation";
 import ElectionDetailsOverViews from "@/components/features/electionDetails/ElectionDetailsOverViews";
 import ElectionDetailsCandidates from "@/components/features/electionDetails/ElectionDetailsCandidates";
 import ElectionDetailsVoters from "@/components/features/electionDetails/ElectionDetailsVoters";
 import ElectionDetailsResults from "@/components/features/electionDetails/ElectionDetailsResults";
+import {Loader} from "@/components/app/Loader";
 
 const tabs = [
     {title: "informations générales", value: "overview"},
@@ -35,7 +30,15 @@ export default function ElectionDetailsPage() {
     const {toast} = useToast();
     const router = useRouter();
     const params = useParams();
+    const searchParams = useSearchParams();
     const electionId = params?.id as string;
+    const activeTab = searchParams.get('tab') || 'overview';
+
+    const {data: election, isLoading, isError} = useGetElectionByIdQuery(Number(electionId));
+
+    const handleTabChange = (value: string) => {
+        router.push(`/dashboard/election/${electionId}?tab=${value}`);
+    };
 
     const handleStartElection = () => {
         toast({
@@ -46,24 +49,44 @@ export default function ElectionDetailsPage() {
         setIsStartDialogOpen(false);
     };
 
+    if (isLoading) {
+        return (
+            <main className="flex bg-secondary flex-1 h-full">
+                <Card className="flex-1 bg-secondary rounded-none shadow-none border-0">
+                    <CardContent className="h-full flex items-center justify-center">
+                        <Loader />
+                    </CardContent>
+                </Card>
+            </main>
+        );
+    }
+
+    if (isError) {
+        return (
+            <main className="flex bg-secondary flex-1 h-full">
+                <Card className="flex-1 bg-secondary rounded-none shadow-none border-0">
+                    <CardContent className="h-full flex items-center justify-center">
+                        <div className="text-red-500">Erreur lors du chargement des données</div>
+                    </CardContent>
+                </Card>
+            </main>
+        );
+    }
+
     return (
         <main className="flex bg-secondary flex-1 h-full">
             <Toaster/>
             <Card className="flex-1 bg-secondary rounded-none shadow-none border-0">
                 <CardHeader className="border-b flex flex-row items-center justify-between py-4">
                     <div className="flex flex-col space-y-1.5">
-                        <CardTitle className="uppercase">
-                            Organisation de l'élection #{electionId}
-                        </CardTitle>
-                        <CardDescription>
-                            Informations générales et statistiques
-                        </CardDescription>
+                        <CardTitle className="uppercase">{election?.data?.title}</CardTitle>
+                        <CardDescription>Informations générales et statistiques</CardDescription>
                     </div>
                     <div className="flex items-center space-x-2">
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button size="sm" variant="secondary" className="border rounded-sm">
-                                    <Ellipsis size={14}/>
+                                    <MoreVertical size={14}/>
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-[230px]">
@@ -89,35 +112,39 @@ export default function ElectionDetailsPage() {
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
                         <StatCard
                             title="Total candidats"
-                            value="10"
+                            value={election?.data?.total_candidates || "0"}
                             icon={<User size={24}/>}
                         />
                         <StatCard
                             title="Total électeurs"
-                            value="230"
+                            value={election?.data?.total_voters || "0"}
                             icon={<Users size={24}/>}
                         />
                         <StatCard
                             title="Taux de progression des votes"
-                            value="100 %"
+                            value={`${election?.data?.vote_progress || 0} %`}
                             icon={<ChartLine size={24}/>}
                         />
                         <StatCard
                             title="Vainqueur de l'élection"
-                            value="Amoikon Yannick"
+                            value={election?.data?.winner || "Non déterminé"}
                             icon={<UserCheck size={24}/>}
                         />
                     </div>
 
                     <div className="flex-1 flex flex-col min-h-0">
-                        <Tabs defaultValue="overview" className="flex-1 flex border rounded-sm flex-col">
-                            <TabsList
-                                className="space-x-2 w-full flex items-center rounded-sm justify-start py-5 border-b border-gray-200">
+                        <Tabs 
+                            defaultValue={activeTab} 
+                            value={activeTab}
+                            onValueChange={handleTabChange}
+                            className="flex-1 flex border rounded-sm flex-col"
+                        >
+                            <TabsList className="space-x-2 w-full flex items-center rounded-sm justify-start py-5 border-b border-gray-200">
                                 {tabs.map((tab) => (
                                     <TabsTrigger
                                         key={tab.value}
                                         value={tab.value}
-                                        className=" uppercase w-6/12 py-1.5 px-4 text-xs rounded-none font-normal transition-colors duration-200 hover:border-gray-300 data-[state=active]:bg-secondary data-[state=active]:border-gray-300 data-[state=active]:text-gray-800"
+                                        className="uppercase w-6/12 py-1.5 px-4 text-xs rounded-none font-normal transition-colors duration-200 hover:border-gray-300 data-[state=active]:bg-secondary data-[state=active]:border-gray-300 data-[state=active]:text-gray-800"
                                     >
                                         {tab.title}
                                     </TabsTrigger>
@@ -125,17 +152,17 @@ export default function ElectionDetailsPage() {
                             </TabsList>
 
                             <div className="flex-1 bg-secondary">
-                                <TabsContent value="overview" className="h-full border overflow-auto  m-0 p-8">
-                                    <ElectionDetailsOverViews/>
+                                <TabsContent value="overview" className="h-full border overflow-auto m-0 p-8">
+                                    <ElectionDetailsOverViews election={election?.data}/>
                                 </TabsContent>
-                                <TabsContent value="candidates" className="h-full border overflow-auto  m-0 p-8">
-                                    <ElectionDetailsCandidates/>
+                                <TabsContent value="candidates" className="h-full border overflow-auto m-0 p-8">
+                                    <ElectionDetailsCandidates electionId={electionId}/>
                                 </TabsContent>
-                                <TabsContent value="voters" className="h-full border overflow-auto  m-0 p-8">
-                                    <ElectionDetailsVoters/>
+                                <TabsContent value="voters" className="h-full border overflow-auto m-0 p-8">
+                                    <ElectionDetailsVoters electionId={electionId}/>
                                 </TabsContent>
-                                <TabsContent value="results" className="h-full border overflow-auto  m-0 p-8">
-                                    <ElectionDetailsResults/>
+                                <TabsContent value="results" className="h-full border overflow-auto m-0 p-8">
+                                    <ElectionDetailsResults electionId={electionId}/>
                                 </TabsContent>
                             </div>
                         </Tabs>

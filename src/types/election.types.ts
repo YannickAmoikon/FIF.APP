@@ -30,3 +30,9 @@ export interface UpdateElectionDto {
     dateTimeStart?: string;
     dateTimeEnd?: string;
 }
+
+export interface ElectionType {
+    id: number;
+    title: string;
+    // ... autres propriétés
+}

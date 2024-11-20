@@ -7,23 +7,23 @@ interface ElectionTableProps {
     data: ElectionTypes[];
 }
 
-export const ElectionTable: React.FC<ElectionTableProps> = ({ data }) => (
-    <Table>
-        <TableHeader>
-            <TableRow>
-                <TableHead className="w-[10%] text-left">ID</TableHead>
-                <TableHead className="w-[30%] text-left">Titre</TableHead>
-                <TableHead className="w-[10%] text-left">Type</TableHead>
-                <TableHead className="w-[15%] text-left">Date début</TableHead>
-                <TableHead className="w-[15%] text-left">Date fin</TableHead>
-                <TableHead className="w-[10%] text-left">Statut</TableHead>
-                <TableHead className="w-[10%] text-right">Action</TableHead>
-            </TableRow>
-        </TableHeader>
-        <TableBody>
-            {data.map((election) => (
-                <ElectionRow key={election.id} {...election} />
-            ))}
-        </TableBody>
-    </Table>
-);
+export const ElectionTable: React.FC<ElectionTableProps> = ({ data = [] }) => {
+    return (
+        <Table>
+            <TableHeader>
+                <TableRow>
+                    <TableHead className="text-left w-[10%]">#ID</TableHead>
+                    <TableHead className="text-left w-[30%]">Titre</TableHead>
+                    <TableHead className="text-left w-[10%]">Type</TableHead>
+                    <TableHead className="text-left w-[15%]">Date début</TableHead>
+                    <TableHead className="text-left w-[15%]">Date fin</TableHead>
+                    <TableHead className="text-center w-[10%]">Statut</TableHead>
+                    <TableHead className="text-right w-[10%]">Action</TableHead>
+                </TableRow>
+            </TableHeader>
+            <TableBody>
+                <ElectionRow elections={data} />
+            </TableBody>
+        </Table>
+    );
+};

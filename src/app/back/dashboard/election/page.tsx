@@ -4,9 +4,8 @@ import {Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle} f
 import {Toaster} from '@/components/ui/toaster';
 import {SearchInput} from '@/components/app/SearchInput';
 import {ElectionTable} from '@/components/features/election/ElectionTable';
-import {Pagination} from '@/components/ui/pagination';
 import CreateElectionDialog from "@/components/features/election/CreateElectionDialog";
-import {useState, useMemo} from "react";
+import {useState} from "react";
 import FilterButton from "@/components/app/FilterButton";
 import ExportButton from "@/components/app/ExportButton";
 import {useGetElectionsQuery} from "@/services/election.services";
@@ -14,80 +13,64 @@ import {useToast} from "@/hooks/use-toast";
 import * as XLSX from 'xlsx';
 import { jsPDF } from "jspdf";
 import 'jspdf-autotable';
-import { BookMarked, ChevronLeft, ChevronRight, FileText } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Loader } from "@/components/app/Loader";
+import { NoDataContent } from '@/components/app/NoDataContent';
 
 export default function ElectionPage() {
     const [currentPage, setCurrentPage] = useState(1);
-    const ITEMS_PER_PAGE = 9;
-    const { data, isLoading } = useGetElectionsQuery();
+    const { data, isLoading } = useGetElectionsQuery(currentPage);
     const [searchTerm, setSearchTerm] = useState("");
     const [activeFilter, setActiveFilter] = useState<string | null>(null);
     const {toast} = useToast();
 
-    // Options de filtrage
+    const elections = data?.data || [];
+
     const filterOptions = [
         {
             label: "Tous",
             value: "all",
-            onClick: () => setActiveFilter(null)
+            onClick: () => {
+                setActiveFilter(null);
+                setCurrentPage(1);
+            }
         },
         {
             label: "Privé",
             value: "Private",
-            onClick: () => setActiveFilter("Private")
+            onClick: () => {
+                setActiveFilter("Private");
+                setCurrentPage(1);
+            }
         },
         {
             label: "Public",
             value: "Public",
-            onClick: () => setActiveFilter("Public")
+            onClick: () => {
+                setActiveFilter("Public");
+                setCurrentPage(1);
+            }
         },
         {
             label: "Mixte",
             value: "Mixt",
-            onClick: () => setActiveFilter("Mixt")
+            onClick: () => {
+                setActiveFilter("Mixt");
+                setCurrentPage(1);
+            }
         }
     ];
 
-    // Filtrer les données
-    const filteredData = useMemo(() => {
-        if (!data?.data) return [];
-        
-        let filtered = [...data.data];
-        
-        // Appliquer le filtre de recherche
-        if (searchTerm) {
-            filtered = filtered.filter(item => 
-                item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                item.description?.toLowerCase().includes(searchTerm.toLowerCase())
-            );
-        }
+    const handleSearch = (value: string) => {
+        setSearchTerm(value);
+        setCurrentPage(1);
+    };
 
-        // Appliquer le filtre de type
-        if (activeFilter) {
-            filtered = filtered.filter(item => item.type === activeFilter);
-        }
-
-        return filtered;
-    }, [data?.data, searchTerm, activeFilter]);
-
-    // Calculer les éléments de la page courante
-    const currentItems = useMemo(() => {
-        const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-        const endIndex = startIndex + ITEMS_PER_PAGE;
-        return filteredData.slice(startIndex, endIndex);
-    }, [filteredData, currentPage]);
-
-    // Calculer le nombre total de pages
-    const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
-
-    // Gestionnaire de changement de page
     const handlePageChange = (newPage: number) => {
         setCurrentPage(newPage);
     };
 
-    // Fonctions d'export
     const handleExportExcel = () => {
         try {
             if (!data?.data) return;
@@ -136,7 +119,8 @@ export default function ElectionPage() {
                 new Date(election.dateTimeEnd).toLocaleString(),
                 election.status
             ]);
-            //@ts-ignore
+
+            // @ts-ignore
             doc.autoTable({
                 head: [tableColumn],
                 body: tableRows,
@@ -157,30 +141,6 @@ export default function ElectionPage() {
             });
         }
     };
-
-    // Gestionnaire de recherche
-    const handleSearch = (value: string) => {
-        setSearchTerm(value);
-        setCurrentPage(1); // Réinitialiser la page lors d'une nouvelle recherche
-    };
-
-    const NoDataContent = () => (
-        <div className="bg-secondary border border-gray-200 p-6 rounded-sm">
-            <div className="flex items-center justify-center flex-col text-center">
-                <BookMarked className="h-12 w-12 text-gray-400 mb-4" />
-                <p className="text-gray-600 font-medium mb-2">
-                    {searchTerm || activeFilter 
-                        ? "Aucune élection ne correspond à vos critères de recherche."
-                        : "Aucune élection n'est disponible."}
-                </p>
-                <p className="text-sm text-gray-500">
-                    {searchTerm || activeFilter 
-                        ? "Essayez de modifier vos filtres ou votre recherche"
-                        : "Cliquez sur le bouton + pour créer une nouvelle élection"}
-                </p>
-            </div>
-        </div>
-    );
 
     return (
         <main className="flex flex-1 h-full">
@@ -212,18 +172,21 @@ export default function ElectionPage() {
                         <div className="flex items-center justify-center h-[400px]">
                             <Loader />
                         </div>
-                    ) : (!data?.data || filteredData.length === 0) ? (
-                        <NoDataContent />
+                    ) : (!elections.length) ? (
+                        <NoDataContent 
+                            type="élections"
+                            searchValue={searchTerm}
+                        />
                     ) : (
-                        <ElectionTable data={currentItems} />
+                        <ElectionTable data={elections} />
                     )}
                 </CardContent>
 
-                {!isLoading && data?.data && filteredData.length > 0 && (
+                {!isLoading && elections.length > 0 && (
                     <CardFooter className="mt-auto border-t py-4 px-6">
                         <div className="w-full flex justify-between items-center">
                             <div className="text-sm text-muted-foreground">
-                                Affichage de {currentItems.length} sur {filteredData.length} élections
+                                Affichage de {elections.length} sur {data?.totalElections} élections
                             </div>
                             <div className="flex items-center justify-center gap-2">
                                 <Button
@@ -238,7 +201,7 @@ export default function ElectionPage() {
                                 </Button>
 
                                 <div className="flex items-center gap-1">
-                                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
+                                    {Array.from({ length: data.totalPages }, (_, i) => i + 1).map((pageNum) => (
                                         <Button
                                             key={pageNum}
                                             variant={pageNum === currentPage ? "default" : "secondary"}
@@ -259,7 +222,7 @@ export default function ElectionPage() {
                                     variant="secondary"
                                     size="sm"
                                     onClick={() => handlePageChange(currentPage + 1)}
-                                    disabled={currentPage >= totalPages}
+                                    disabled={currentPage >= data.totalPages}
                                     className="px-4 rounded-sm hover:bg-secondary border hover:text-gray-900 transition-colors"
                                 >
                                     Suiv
