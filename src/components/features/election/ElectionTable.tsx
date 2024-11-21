@@ -22,7 +22,9 @@ export const ElectionTable: React.FC<ElectionTableProps> = ({ data = [] }) => {
                 </TableRow>
             </TableHeader>
             <TableBody>
-                <ElectionRow elections={data} />
+                <ElectionRow
+                //@ts-ignore
+                 elections={data} />
             </TableBody>
         </Table>
     );

@@ -21,19 +21,16 @@ export default function SideBar({className = ""}: { className?: string }) {
     const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
 
     const isActive = (url: string) => {
-        if (url === "/back/dashboard") {
-            return pathname === url;
-        }
-        return pathname.startsWith(url);
+        // Correspondance exacte pour le tableau de bord, préfixe pour les autres routes
+        return pathname === url || 
+               (url !== "/back/dashboard" && pathname.startsWith(url));
     };
 
     const handleLogout = async () => {
         try {
-            // Suppression des données d'authentification
             localStorage.removeItem("token");
             localStorage.removeItem("user");
 
-            // Redirection avec délai pour voir le toast
             setTimeout(() => {
                 router.push("/back/login");
                 router.refresh();
@@ -54,8 +51,8 @@ export default function SideBar({className = ""}: { className?: string }) {
             href={item.url}
             className={`flex rounded-sm text-sm items-center gap-3 px-3 py-2.5 transition-all
                 ${isActive(item.url)
-                    ? "bg-green-600 text-white font-semibold"
-                    : "text-gray-600 hover:bg-orange-100 font-semibold hover:text-orange-600"
+                    ? "bg-white text-orange-500 font-semibold"
+                    : "text-white hover:bg-orange-300 hover:text-white"
             }`}
         >
             <item.icon className="h-5 w-5"/>
@@ -65,8 +62,8 @@ export default function SideBar({className = ""}: { className?: string }) {
 
     return (
         <>
-            <aside className={`bg-secondary text-gray-900 w-64 min-h-screen flex-col shadow-lg hidden md:flex border-r ${className}`}>
-                <div className="flex h-20 space-x-1.5 items-center justify-center px-3 border-b bg-orange-500">
+            <aside className={`bg-orange-400 text-gray-900 w-64 min-h-screen flex-col shadow-lg hidden md:flex border-r ${className}`}>
+                <div className="flex h-20 space-x-1.5 items-center justify-center px-3 border-b bg-orange-400">
                     <Image
                         src="/logo.png"
                         alt="Logo FIF"
@@ -92,9 +89,9 @@ export default function SideBar({className = ""}: { className?: string }) {
                     <Link
                         href="/back/dashboard/help"
                         className={`flex rounded-sm text-sm items-center gap-3 px-3 py-2.5 transition-all
-                            ${pathname === "/back/dashboard/help"
-                                ? "bg-green-600 text-white font-semibold"
-                                : "text-gray-600 hover:bg-orange-100 font-semibold hover:text-orange-600"
+                            ${isActive("/back/dashboard/help")
+                                ? "bg-white text-orange-500 font-semibold"
+                                : "text-white hover:bg-orange-300 hover:text-white"
                         }`}
                     >
                         <Info className="h-5 w-5"/>
@@ -102,7 +99,7 @@ export default function SideBar({className = ""}: { className?: string }) {
                     </Link>
                     <button
                         onClick={() => setIsLogoutDialogOpen(true)}
-                        className="flex rounded-sm text-sm items-center gap-3 px-3 py-2.5 text-gray-600 hover:bg-orange-100 hover:text-orange-600 transition-all w-full mt-2"
+                        className="flex rounded-sm text-sm items-center gap-3 px-3 py-2.5 text-white hover:bg-orange-300 hover:text-white transition-all w-full mt-2"
                     >
                         <LogOut className="h-5 w-5"/>
                         <span>Déconnexion</span>
@@ -132,7 +129,7 @@ export default function SideBar({className = ""}: { className?: string }) {
                         </Button>
                         <Button
                             size="sm"
-                            className="rounded-sm bg-green-600 hover:bg-green-700"
+                            className="rounded-sm bg-green-600 hover:bg-green-600"
                             onClick={handleLogout}
                         >
                             <Check className="mr-1" size={14}/>

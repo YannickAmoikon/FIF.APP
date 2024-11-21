@@ -69,6 +69,8 @@ export default function ElectionDetailsVoters({ electionId }: ElectionDetailsVot
     const {data: categories} = useGetCategoriesQuery();
     const [createVoter] = useCreateVoterMutation();
     const [deleteVoter] = useDeleteVoterMutation();
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+    const [voterToDelete, setVoterToDelete] = useState<any>(null);
 
     // Récupération des données de l'élection avec le refetch
     const {data: electionData, isLoading, refetch} = useGetElectionByIdQuery(Number(electionId));
@@ -129,11 +131,16 @@ export default function ElectionDetailsVoters({ electionId }: ElectionDetailsVot
         }
     };
 
-    const handleDelete = async (id: string) => {
+    const handleDelete = (voter: any) => {
+        setVoterToDelete(voter);
+        setIsDeleteDialogOpen(true);
+    };
+
+    const confirmDelete = async () => {
+        if (!voterToDelete) return;
+        
         try {
-            await deleteVoter(id).unwrap();
-            
-            // Refetch des données après la suppression
+            await deleteVoter(voterToDelete.id.toString()).unwrap();
             await refetch();
             
             toast({
@@ -141,6 +148,8 @@ export default function ElectionDetailsVoters({ electionId }: ElectionDetailsVot
                 description: "Électeur supprimé avec succès",
                 className: "bg-green-600 text-white",
             });
+            setIsDeleteDialogOpen(false);
+            setVoterToDelete(null);
         } catch (error) {
             toast({
                 title: "Erreur",
@@ -209,7 +218,7 @@ export default function ElectionDetailsVoters({ electionId }: ElectionDetailsVot
                                         <DropdownMenuContent align="end">
                                             <DropdownMenuItem
                                                 className="text-red-600"
-                                                onClick={() => handleDelete(voter.id.toString())}
+                                                onClick={() => handleDelete(voter)}
                                             >
                                                 <Trash className="mr-2 h-4 w-4" />
                                                 Supprimer
@@ -356,6 +365,46 @@ export default function ElectionDetailsVoters({ electionId }: ElectionDetailsVot
                             </DialogFooter>
                         </form>
                     </Form>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+                <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                        <DialogTitle className="text-red-600 flex items-center gap-2">
+                            <Trash className="h-5 w-5" />
+                            Confirmer la suppression
+                        </DialogTitle>
+                        <DialogDescription>
+                            Êtes-vous sûr de vouloir supprimer l'électeur{" "}
+                            <span className="font-semibold">
+                                {voterToDelete?.name} {voterToDelete?.last_name}
+                            </span>
+                            ? Cette action est irréversible.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="flex justify-end gap-3 mt-4">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => {
+                                setIsDeleteDialogOpen(false);
+                                setVoterToDelete(null);
+                            }}
+                        >
+                            Annuler
+                        </Button>
+                        <Button
+                            type="button"
+                            variant="destructive"
+                            className="gap-2"
+                            onClick={confirmDelete}
+                        >
+                            <Trash className="h-4 w-4" />
+                            Supprimer
+                        </Button>
+                    </div>
                 </DialogContent>
             </Dialog>
         </ScrollArea>

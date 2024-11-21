@@ -42,8 +42,8 @@ interface ElectionRowProps {
 
 const getStatusBadge = (status: string) => {
     const statusStyles = {
-        'coming': 'flex justify-center border text-red-400 border-red-400 w-20',
-        'in progress': 'flex justify-center border text-gray-600 border-gray-600 w-20 animate-pulse border',
+        'coming': 'flex justify-center border text-gray-900 border-gray-900 w-20',
+        'in progress': 'flex justify-center border text-green-600 border-grenn-600 w-20 animate-pulse border',
         'finished': 'flex justify-center border text-green-600 border-green-600 w-20'
     };
     return statusStyles[status as keyof typeof statusStyles];

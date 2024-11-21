@@ -16,6 +16,28 @@ interface ElectionDetailsOverViewsProps {
     };
 }
 
+// Ajouter cette fonction pour traduire les statuts
+const translateStatus = (status: string) => {
+    const statusMap: { [key: string]: string } = {
+        'coming': 'À venir',
+        'in progress': 'En cours',
+        'finished': 'Terminée',
+        'N/A': 'Non défini'
+    };
+    return statusMap[status] || status;
+};
+
+// Ajouter cette fonction pour traduire les types
+const translateType = (type: string) => {
+    const typeMap: { [key: string]: string } = {
+        'Mixt': 'Mixte',
+        'Private': 'Privé',
+        'Public': 'Public',
+        'N/A': 'Non défini'
+    };
+    return typeMap[type] || type;
+};
+
 export default function ElectionDetailsOverViews({ election }: ElectionDetailsOverViewsProps) {
     if (!election) {
         return null;
@@ -33,13 +55,13 @@ export default function ElectionDetailsOverViews({ election }: ElectionDetailsOv
         }).replace(',', '');
     };
 
-    const formattedId = election?.id ? `EL${election.id.toString().padStart(3, '0')}` : 'N/A';
-    const title = election?.title || 'N/A';
-    const type = election?.type || 'N/A';
+    const formattedId = election?.id ? `EL${election.id.toString().padStart(3, '0')}` : 'Non défini';
+    const title = election?.title || 'Non défini';
+    const type = translateType(election?.type || 'N/A');
     const description = election?.description || 'Aucune description';
     const startDate = formatDate(election?.date_time_start);
     const endDate = formatDate(election?.date_time_end);
-    const status = election?.statut || 'N/A';
+    const status = translateStatus(election?.statut || 'N/A');
 
     return (
         <ScrollArea className="h-full p-2">

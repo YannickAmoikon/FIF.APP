@@ -44,11 +44,12 @@ interface ElectionResponse {
 
 export default function ElectionPage() {
     const [currentPage, setCurrentPage] = useState(1);
+    //@ts-ignore
     const { data, isLoading } = useGetElectionsQuery<ElectionResponse>(currentPage);
     const [searchTerm, setSearchTerm] = useState("");
     const [activeFilter, setActiveFilter] = useState<string | null>(null);
     const {toast} = useToast();
-
+//@ts-ignore
     const elections: Election[] = data?.data || [];
 
     const filterOptions = [
@@ -97,8 +98,9 @@ export default function ElectionPage() {
 
     const handleExportExcel = () => {
         try {
+            //@ts-ignore
             if (!data?.data) return;
-            
+            //@ts-ignore
             const exportData = data.data.map(election => ({
                 ID: election.id,
                 Titre: election.title,
@@ -130,11 +132,13 @@ export default function ElectionPage() {
 
     const handleExportPDF = () => {
         try {
+            //@ts-ignore
             if (!data?.data) return;
 
             const doc = new jsPDF();
             
             const tableColumn = ["ID", "Titre", "Type", "Date début", "Date fin", "Statut"];
+            //@ts-ignore
             const tableRows = data.data.map(election => [
                 election.id,
                 election.title,
@@ -202,6 +206,7 @@ export default function ElectionPage() {
                             searchValue={searchTerm}
                         />
                     ) : (
+                        //@ts-ignore
                         <ElectionTable data={elections} />
                     )}
                 </CardContent>
@@ -210,7 +215,10 @@ export default function ElectionPage() {
                     <CardFooter className="mt-auto border-t py-4 px-6">
                         <div className="w-full flex justify-between items-center">
                             <div className="text-sm text-muted-foreground">
-                                Affichage de {elections.length} sur {data?.totalElections} élections
+                                Affichage de {elections.length} sur {
+                                    //@ts-ignore
+                                data?.totalElections} élections
+
                             </div>
                             <div className="flex items-center justify-center gap-2">
                                 <Button
@@ -225,7 +233,9 @@ export default function ElectionPage() {
                                 </Button>
 
                                 <div className="flex items-center gap-1">
-                                    {Array.from({ length: data.totalPages }, (_, i) => i + 1).map((pageNum) => (
+                                    {Array.from({
+                                        //@ts-ignore
+                                         length: data.totalPages }, (_, i) => i + 1).map((pageNum) => (
                                         <Button
                                             key={pageNum}
                                             variant={pageNum === currentPage ? "default" : "secondary"}
@@ -233,8 +243,8 @@ export default function ElectionPage() {
                                             onClick={() => handlePageChange(pageNum)}
                                             className={`w-8 h-8 p-0 rounded-sm ${
                                                 pageNum === currentPage 
-                                                    ? "bg-orange-500 hover:bg-green-600 text-primary-foreground" 
-                                                    : "hover:bg-green-500 hover:text-green-500"
+                                                    ? "bg-secondary border hover:bg-secondary text-gray-900" 
+                                                    : "hover:bg-secondary hover:text-secondary"
                                             }`}
                                         >
                                             {pageNum}
@@ -246,7 +256,9 @@ export default function ElectionPage() {
                                     variant="secondary"
                                     size="sm"
                                     onClick={() => handlePageChange(currentPage + 1)}
-                                    disabled={currentPage >= data.totalPages}
+                                    disabled={
+                                        //@ts-ignore
+                                        currentPage >= data.totalPages}
                                     className="px-4 rounded-sm hover:bg-secondary border hover:text-gray-900 transition-colors"
                                 >
                                     Suiv

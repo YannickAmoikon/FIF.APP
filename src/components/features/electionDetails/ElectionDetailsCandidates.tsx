@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
-import { Plus, MoreVertical, Trash, FilePenLine, Save } from "lucide-react";
+import { Plus, MoreVertical, Trash, FilePenLine, Save, Phone, Calendar as CalendarIcon, FileText, Check } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { SearchInput } from "@/components/app/SearchInput";
 import {
@@ -24,7 +24,6 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Calendar } from "@/components/ui/calendar";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -45,6 +44,7 @@ import { CandidateTypes } from "@/types/candidate.types";
 // Correction : Importation de NoDataContent depuis le bon emplacement
 import { NoDataContent } from '@/components/app/NoDataContent';
 import { useGetElectionByIdQuery } from "@/services/election.services";
+import { Textarea } from "@/components/ui/textarea";
 
 // Schéma de validation
 const formSchema = z.object({
@@ -55,6 +55,7 @@ const formSchema = z.object({
 	birth_date: z.date().refine((date) => date < new Date(), {
 		message: "La date de naissance doit être dans le passé",
 	}),
+	bio: z.string().min(2, {message: "La bio du candidat est requise"})
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -80,6 +81,10 @@ export default function ElectionDetailsCandidates({
 	const {toast} = useToast();
 	const [createCandidate] = useCreateCandidateMutation();
 	const [deleteCandidate] = useDeleteCandidateMutation();
+	const [selectedCandidate, setSelectedCandidate] = useState<CandidateTypes | null>(null);
+	const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+	const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+	const [candidateToDelete, setCandidateToDelete] = useState<CandidateTypes | null>(null);
 
 	// Récupération des données de l'élection avec le refetch
 	const {data: electionData, isLoading, refetch} = useGetElectionByIdQuery(Number(electionId));
@@ -101,6 +106,7 @@ export default function ElectionDetailsCandidates({
 			email: "",
 			phone: "",
 			birth_date: new Date(),
+			bio: "",
 		},
 	});
 
@@ -134,24 +140,31 @@ export default function ElectionDetailsCandidates({
 		}
 	};
 
-	const handleDelete = async (id: string) => {
+	const handleDelete = async (candidate: CandidateTypes) => {
+		setCandidateToDelete(candidate);
+		setIsDeleteDialogOpen(true);
+	};
+
+	const confirmDelete = async () => {
+		if (!candidateToDelete) return;
+		
 		try {
-			await deleteCandidate(id).unwrap();
-			
-			// Refetch des données après la suppression
+			await deleteCandidate(candidateToDelete.id.toString()).unwrap();
 			await refetch();
 			
 			toast({
 				title: "Succès",
 				description: "Candidat supprimé avec succès",
-				className: "bg-green-600 text-white",
+					className: "bg-green-600 text-white",
 			});
+			setIsDeleteDialogOpen(false);
+			setCandidateToDelete(null);
 		} catch (error) {
-				toast({
-					title: "Erreur",
-					description: "Impossible de supprimer le candidat",
-					variant: "destructive",
-				});
+			toast({
+				title: "Erreur",
+				description: "Impossible de supprimer le candidat",
+				variant: "destructive",
+			});
 		}
 	};
 
@@ -201,13 +214,13 @@ export default function ElectionDetailsCandidates({
 											<div className="flex items-center space-x-4">
 												<div className="w-12 h-12 bg-secondary border-2 rounded-full flex items-center justify-center">
 													<span className="text-sm font-medium">
-														{candidate.name.charAt(0).toUpperCase()}
-														{candidate.last_name.charAt(0).toUpperCase()}
+														{candidate.last_name?.charAt(0).toUpperCase() || ''}
+														{candidate.name?.charAt(0).toUpperCase() || ''}
 													</span>
 												</div>
 												<div>
 													<h4 className="font-medium">
-														{candidate.name} {candidate.last_name}
+														{candidate.last_name} {candidate.name}
 													</h4>
 													<p className="text-sm text-gray-500">{candidate.email}</p>
 												</div>
@@ -220,8 +233,19 @@ export default function ElectionDetailsCandidates({
 												</DropdownMenuTrigger>
 												<DropdownMenuContent align="end">
 													<DropdownMenuItem
+														onClick={() => {
+															//@ts-ignore
+															setSelectedCandidate(candidate);
+															setIsDetailsOpen(true);
+														}}
+													>
+														<FileText className="mr-2 h-4 w-4" />
+														Détails
+													</DropdownMenuItem>
+													<DropdownMenuItem
 														className="text-red-600"
-														onClick={() => handleDelete(candidate.id.toString())}
+														//@ts-ignore
+														onClick={() => handleDelete(candidate)}
 													>
 														<Trash className="mr-2 h-4 w-4" />
 														Supprimer
@@ -248,84 +272,112 @@ export default function ElectionDetailsCandidates({
 
 					<Form {...form}>
 						<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-							<FormField
-								control={form.control}
-								name="name"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Nom</FormLabel>
-										<FormControl>
-											<Input {...field} placeholder="John" />
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
+							{/* Nom et Prénoms côte à côte */}
+							<div className="grid grid-cols-2 gap-4">
+								<FormField
+									control={form.control}
+									name="last_name"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>Nom</FormLabel>
+											<FormControl>
+												<Input {...field} placeholder="Doe" />
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
 
-							<FormField
-								control={form.control}
-								name="last_name"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Prénoms</FormLabel>
-										<FormControl>
-											<Input {...field} placeholder="Doe" />
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
+								<FormField
+									control={form.control}
+									name="name"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>Prénoms</FormLabel>
+											<FormControl>
+												<Input {...field} placeholder="John" />
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+							</div>
 
+							{/* Email et Téléphone côte à côte */}
+							<div className="grid grid-cols-2 gap-4">
+								<FormField
+									control={form.control}
+									name="email"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>Email</FormLabel>
+											<FormControl>
+												<Input
+													{...field}
+													type="email"
+													placeholder="john.doe@example.com"
+												/>
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+
+								<FormField
+									control={form.control}
+									name="phone"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>Téléphone</FormLabel>
+											<FormControl>
+												<Input {...field} placeholder="+225 0123456789" />
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+							</div>
+
+							{/* Date de naissance */}
 							<FormField
 								control={form.control}
-								name="email"
-								render={({ field }) => (
+								name="birth_date"
+								render={({field}) => (
 									<FormItem>
-										<FormLabel>Email</FormLabel>
+										<FormLabel>Date de naissance</FormLabel>
 										<FormControl>
 											<Input
 												{...field}
-												type="email"
-												placeholder="john.doe@example.com"
+												type="date"
+												className="w-full rounded-sm"
+												value={field.value ? field.value.toISOString().split('T')[0] : ''}
+												onChange={(e) => field.onChange(new Date(e.target.value))}
+											/>
+										</FormControl>
+										<FormMessage/>
+									</FormItem>
+								)}
+							/>
+
+							{/* Biographie */}
+							<FormField
+								control={form.control}
+								name="bio"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Biographie</FormLabel>
+										<FormControl>
+											<Textarea 
+												{...field} 
+												placeholder="Entrez la biographie du candidat..."
+												className="resize-none"
+												rows={4}
 											/>
 										</FormControl>
 										<FormMessage />
 									</FormItem>
 								)}
 							/>
-
-							<FormField
-								control={form.control}
-								name="phone"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Téléphone</FormLabel>
-										<FormControl>
-											<Input {...field} placeholder="+225 0123456789" />
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-							 <FormField
-                                control={form.control}
-                                name="birth_date"
-                                render={({field}) => (
-                                    <FormItem>
-                                        <FormLabel>Date de naissance</FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                {...field}
-                                                type="date"
-                                                className="w-full rounded-sm"
-                                                value={field.value ? field.value.toISOString().split('T')[0] : ''}
-                                                onChange={(e) => field.onChange(new Date(e.target.value))}
-                                            />
-                                        </FormControl>
-                                        <FormMessage/>
-                                    </FormItem>
-                                )}
-                            />
 
 							<DialogFooter>
 								<Button
@@ -339,6 +391,105 @@ export default function ElectionDetailsCandidates({
 							</DialogFooter>
 						</form>
 					</Form>
+				</DialogContent>
+			</Dialog>
+
+			<Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
+				<DialogContent>
+					<DialogHeader>
+						<DialogTitle>Détails du candidat</DialogTitle>
+					</DialogHeader>
+					
+					{selectedCandidate && (
+						<div className="space-y-4">
+							{/* En-tête avec avatar */}
+							<div className="flex items-center space-x-4">
+								<div className="w-16 h-16 bg-white border-2 rounded-full flex items-center justify-center">
+									<span className="text-lg font-medium">
+										{selectedCandidate.last_name.charAt(0).toUpperCase()}
+										{selectedCandidate.name.charAt(0).toUpperCase()}
+									</span>
+								</div>
+								<div>
+									<h3 className="font-medium text-lg">
+										{selectedCandidate.last_name} {selectedCandidate.name}
+									</h3>
+									<p className="text-sm text-gray-500">{selectedCandidate.email}</p>
+								</div>
+							</div>
+
+							{/* Informations détaillées */}
+							<div className="space-y-3 pt-4 border-t">
+								<div className="flex items-center text-sm">
+									<Phone className="w-4 h-4 mr-2 text-gray-500" />
+									<span>{selectedCandidate.phone}</span>
+								</div>
+								<div className="flex items-center text-sm">
+									<CalendarIcon className="w-4 h-4 mr-2 text-gray-500" />
+									<span>
+										{new Date(selectedCandidate.birth_date).toLocaleDateString('fr-FR', {
+											day: 'numeric',
+											month: 'long',
+											year: 'numeric'
+										})}
+									</span>
+								</div>
+							</div>
+
+							{/* Biographie complète */}
+							{selectedCandidate.bio && (
+								<div className="pt-4 border-t">
+									<h4 className="text-sm font-medium mb-2 flex items-center">
+										<FileText className="w-4 h-4 mr-2 text-gray-500" />
+										Biographie
+									</h4>
+									<p className="text-sm text-gray-600 whitespace-pre-wrap">
+										{selectedCandidate.bio}
+									</p>
+								</div>
+							)}
+						</div>
+					)}
+				</DialogContent>
+			</Dialog>
+
+			<Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+				<DialogContent className="sm:max-w-[425px]">
+					<DialogHeader>
+						<DialogTitle className="text-red-600 flex items-center gap-2">
+							<Trash className="h-5 w-5" />
+							Confirmer la suppression
+						</DialogTitle>
+						<DialogDescription>
+							Êtes-vous sûr de vouloir supprimer le candidat{" "}
+							<span className="font-semibold">
+								{candidateToDelete?.name} {candidateToDelete?.last_name}
+							</span>
+							? Cette action est irréversible.
+						</DialogDescription>
+					</DialogHeader>
+
+					<div className="flex justify-end gap-3 mt-4">
+						<Button
+							type="button"
+							variant="outline"
+							onClick={() => {
+								setIsDeleteDialogOpen(false);
+								setCandidateToDelete(null);
+							}}
+						>
+							Annuler
+						</Button>
+						<Button
+							type="button"
+							variant="destructive"
+							className="gap-2"
+							onClick={confirmDelete}
+						>
+							<Trash className="h-4 w-4" />
+							Supprimer
+						</Button>
+					</div>
 				</DialogContent>
 			</Dialog>
 		</ScrollArea>

@@ -3,6 +3,7 @@
 import "@/styles/globals.css";
 import LocalFont from 'next/font/local'
 import {Providers} from "@/components/providers/providers";
+import { Toaster } from "@/components/ui/toaster";
 
 const font = LocalFont({
     src: '../fonts/GeistVF.woff',
@@ -27,6 +28,7 @@ export default function RootLayout({
                 <Providers>
                     {children}
                 </Providers>
+                <Toaster/>
             </body>
         </html>
     );
