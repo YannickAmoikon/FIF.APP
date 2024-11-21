@@ -5,28 +5,23 @@ import Link from "next/link";
 import Image from "next/image";
 import {usePathname, useRouter} from "next/navigation";
 import {AlertTriangle, BookMarked, Check, Info, LayoutDashboard, LogOut} from "lucide-react";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from "@/components/ui/dialog";
+import {Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import {Button} from "@/components/ui/button";
+import {useToast} from "@/hooks/use-toast";
 
 const items = [
-    {title: "Tableau de bord", url: "/dashboard", icon: LayoutDashboard},
-    {title: "Élections", url: "/dashboard/election", icon: BookMarked},
+    {title: "Tableau de bord", url: "/back/dashboard", icon: LayoutDashboard},
+    {title: "Élections", url: "/back/dashboard/election", icon: BookMarked},
 ];
 
 export default function SideBar({className = ""}: { className?: string }) {
     const pathname = usePathname();
     const router = useRouter();
+    const {toast} = useToast();
     const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
 
     const isActive = (url: string) => {
-        if (url === "/dashboard") {
+        if (url === "/back/dashboard") {
             return pathname === url;
         }
         return pathname.startsWith(url);
@@ -34,11 +29,29 @@ export default function SideBar({className = ""}: { className?: string }) {
 
     const handleLogout = async () => {
         try {
-            localStorage.removeItem("token")
-            localStorage.removeItem("email")
-            router.push("/")
+            // Suppression des données d'authentification
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+
+            toast({
+                title: "Déconnexion réussie",
+                description: "Vous allez être redirigé vers la page de connexion.",
+                className: "bg-green-600 text-white",
+            });
+
+            // Redirection avec délai pour voir le toast
+            setTimeout(() => {
+                router.push("/back/login");
+                router.refresh();
+            }, 1000);
+
         } catch (error) {
             console.error("Erreur lors de la déconnexion:", error);
+            toast({
+                title: "Erreur",
+                description: "Une erreur est survenue lors de la déconnexion",
+                variant: "destructive",
+            });
         }
     };
 
@@ -46,8 +59,7 @@ export default function SideBar({className = ""}: { className?: string }) {
         <Link
             href={item.url}
             className={`flex rounded-sm text-sm items-center gap-3 px-3 py-2.5 transition-all
-        ${
-                isActive(item.url)
+                ${isActive(item.url)
                     ? "bg-green-600 text-white font-semibold"
                     : "text-gray-600 hover:bg-orange-100 font-semibold hover:text-orange-600"
             }`}
@@ -59,9 +71,7 @@ export default function SideBar({className = ""}: { className?: string }) {
 
     return (
         <>
-            <aside
-                className={`bg-secondary text-gray-900 w-64 min-h-screen flex-col shadow-lg hidden md:flex border-r ${className}`}
-            >
+            <aside className={`bg-secondary text-gray-900 w-64 min-h-screen flex-col shadow-lg hidden md:flex border-r ${className}`}>
                 <div className="flex h-20 space-x-1.5 items-center justify-center px-3 border-b bg-orange-500">
                     <Image
                         src="/logo.png"
@@ -72,7 +82,7 @@ export default function SideBar({className = ""}: { className?: string }) {
                         priority
                     />
                     <div>
-                        <h1 className="text-sm font-bold text-white">FEDERATION <br/> IVOIRIENNE DE FOOTBALL </h1>
+                        <h1 className="text-sm font-bold text-white">FEDERATION <br/> IVOIRIENNE DE FOOTBALL</h1>
                     </div>
                 </div>
 
@@ -86,10 +96,9 @@ export default function SideBar({className = ""}: { className?: string }) {
 
                 <div className="p-4 border-t-2">
                     <Link
-                        href={"/dashboard/help"}
+                        href="/back/dashboard/help"
                         className={`flex rounded-sm text-sm items-center gap-3 px-3 py-2.5 transition-all
-                        ${
-                            pathname === "/dashboard/help"
+                            ${pathname === "/back/dashboard/help"
                                 ? "bg-green-600 text-white font-semibold"
                                 : "text-gray-600 hover:bg-orange-100 font-semibold hover:text-orange-600"
                         }`}
@@ -129,7 +138,7 @@ export default function SideBar({className = ""}: { className?: string }) {
                         </Button>
                         <Button
                             size="sm"
-                            className="rounded-sm bg-green-600 hover:bg-green-600"
+                            className="rounded-sm bg-green-600 hover:bg-green-700"
                             onClick={handleLogout}
                         >
                             <Check className="mr-1" size={14}/>

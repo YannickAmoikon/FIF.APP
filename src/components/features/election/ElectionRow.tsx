@@ -20,10 +20,24 @@ import {Badge} from "@/components/ui/badge";
 import Link from "next/link";
 import {useDeleteElectionMutation} from "@/services/election.services";
 import {useToast} from "@/hooks/use-toast";
-import { ElectionTypes } from "@/types/election.types";
+
+// Interface pour une élection individuelle
+interface Election {
+    id: number;
+    date_time_start: string;
+    date_time_end: string;
+    title: string;
+    description: string;
+    type_id: number;
+    statut: 'coming' | 'in progress' | 'finished';
+    type: 'Private' | 'Public' | 'Mixt';
+    created_at: string;
+    updated_at: string;
+    is_active: boolean;
+}
 
 interface ElectionRowProps {
-    elections: ElectionTypes[];
+    elections: Election[];
 }
 
 const getStatusBadge = (status: string) => {
@@ -117,7 +131,7 @@ export const ElectionRow: React.FC<ElectionRowProps> = ({ elections = [] }) => {
                                     <FilePenLine className="mr-1" size={14}/>
                                     Modifier
                                 </DropdownMenuItem>
-                                <Link href={`/dashboard/election/${election.id}?title=${election.title}?status=${election.statut}`}>
+                                <Link href={`/back/dashboard/election/${election.id}?title=${election.title}&status=${election.statut}`}>
                                     <DropdownMenuItem>
                                         <Settings2 className="mr-1" size={14}/>
                                         Organiser

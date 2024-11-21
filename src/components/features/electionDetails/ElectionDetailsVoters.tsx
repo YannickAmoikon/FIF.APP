@@ -5,8 +5,8 @@ import {Button} from "@/components/ui/button";
 import {Plus, MoreVertical, Trash, Save, Users2, Vote} from "lucide-react";
 import {Card} from "@/components/ui/card";
 import {SearchInput} from "@/components/app/SearchInput";
-import {useState, useEffect} from "react";
-import {useGetVotersByElectionQuery, useCreateVoterMutation, useDeleteVoterMutation} from "@/services/voter.services";
+import {useState} from "react";
+import {useCreateVoterMutation, useDeleteVoterMutation} from "@/services/voter.services";
 import {useGetCategoriesQuery} from "@/services/category.services";
 import {Loader} from "@/components/app/Loader";
 import {
@@ -43,8 +43,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { useInView } from "react-intersection-observer";
-import { VoterTypes } from "@/types/voter.types";
+import { useGetElectionByIdQuery } from "@/services/election.services";
 import { NoDataContent } from '@/components/app/NoDataContent';
 
 const formSchema = z.object({
@@ -67,19 +66,21 @@ export default function ElectionDetailsVoters({ electionId }: ElectionDetailsVot
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [searchValue, setSearchValue] = useState("");
     const {toast} = useToast();
-    const [page, setPage] = useState(1);
-    const [allVoters, setAllVoters] = useState<VoterType[]>([]);
-    const { ref, inView } = useInView();
-    const ITEMS_PER_PAGE = 18;
-
-    const {data: voters, isLoading, isFetching} = useGetVotersByElectionQuery({
-        electionId,
-        page,
-        limit: ITEMS_PER_PAGE
-    });
     const {data: categories} = useGetCategoriesQuery();
     const [createVoter] = useCreateVoterMutation();
     const [deleteVoter] = useDeleteVoterMutation();
+
+    // Récupération des données de l'élection avec le refetch
+    const {data: electionData, isLoading, refetch} = useGetElectionByIdQuery(Number(electionId));
+    
+    // Filtrer d'abord les électeurs actifs, puis appliquer les autres filtres
+    const activeAndFilteredVoters = electionData?.data?.votants
+        ?.filter(voter => voter.is_active) // Filtre des électeurs actifs
+        ?.filter((voter) =>
+            `${voter.name} ${voter.last_name}`
+                .toLowerCase()
+                .includes(searchValue.toLowerCase())
+        ) || [];
 
     const form = useForm<FormValues>({
         resolver: zodResolver(formSchema),
@@ -104,9 +105,13 @@ export default function ElectionDetailsVoters({ electionId }: ElectionDetailsVot
                 body: {
                     ...values,
                     categorie: selectedCategory?.title || '',
+                    election_id: Number(electionId) // Ajout de l'election_id
                 },
                 electionId: electionId
             }).unwrap();
+
+            // Refetch des données après la création
+            await refetch();
 
             toast({
                 title: "Succès",
@@ -127,6 +132,10 @@ export default function ElectionDetailsVoters({ electionId }: ElectionDetailsVot
     const handleDelete = async (id: string) => {
         try {
             await deleteVoter(id).unwrap();
+            
+            // Refetch des données après la suppression
+            await refetch();
+            
             toast({
                 title: "Succès",
                 description: "Électeur supprimé avec succès",
@@ -140,32 +149,6 @@ export default function ElectionDetailsVoters({ electionId }: ElectionDetailsVot
             });
         }
     };
-
-    useEffect(() => {
-        if (voters?.data && !isFetching) {
-            if (page === 1) {
-                setAllVoters(voters.data);
-            } else {
-                setAllVoters(prev => [...prev, ...voters.data]);
-            }
-        }
-    }, [voters?.data, isFetching]);
-
-    useEffect(() => {
-        if (inView && 
-            !isLoading && 
-            !isFetching && 
-            page < (voters?.totalPages || 0) && 
-            allVoters.length >= ITEMS_PER_PAGE) {
-            setPage(prev => prev + 1);
-        }
-    }, [inView, isLoading, isFetching, voters?.totalPages, allVoters.length]);
-
-    const filteredVoters = allVoters.filter((voter) =>
-        `${voter.name} ${voter.last_name}`
-            .toLowerCase()
-            .includes(searchValue.toLowerCase()),
-    );
 
     if (isLoading) return <Loader />;
 
@@ -189,83 +172,54 @@ export default function ElectionDetailsVoters({ electionId }: ElectionDetailsVot
                         onClick={() => setIsCreateOpen(true)}
                     >
                         <Plus className="h-4 w-4 mr-1" />
-                        Ajouter un électeur
+                        Nouvel électeur
                     </Button>
                 </div>
 
-                {isLoading && (
-                    <div className="flex justify-center items-center py-8">
-                        <Loader />
-                    </div>
-                )}
-
-                {!isLoading && (
-                    <>
-                        {filteredVoters?.length === 0 ? (
-                            <NoDataContent 
-                                type="électeurs" 
-                                searchValue={searchValue}
-                            />
-                        ) : (
-                            <div className="grid grid-cols-3 gap-4">
-                                {filteredVoters?.map((voter) => (
-                                    <Card key={voter.id} className="p-4 rounded-sm bg-secondary">
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex items-center space-x-4">
-                                                <div className="w-12 h-12 bg-secondary border-2 rounded-full flex items-center justify-center">
-                                                    <span className="text-sm font-medium">
-                                                        {voter.name.charAt(0).toUpperCase()}
-                                                        {voter.last_name.charAt(0).toUpperCase()}
-                                                    </span>
-                                                </div>
-                                                <div>
-                                                    <h4 className="font-medium">
-                                                        {voter.name} {voter.last_name}
-                                                    </h4>
-                                                    <p className="text-sm text-gray-500">{voter.email}</p>
-                                                </div>
-                                            </div>
-                                            <DropdownMenu>
-                                                <DropdownMenuTrigger asChild>
-                                                    <Button variant="ghost" className="h-8 w-8 p-0">
-                                                        <MoreVertical className="h-4 w-4" />
-                                                    </Button>
-                                                </DropdownMenuTrigger>
-                                                <DropdownMenuContent align="end">
-                                                    <DropdownMenuItem
-                                                        className="text-red-600"
-                                                        onClick={() => handleDelete(voter.id.toString())}
-                                                    >
-                                                        <Trash className="mr-2 h-4 w-4" />
-                                                        Supprimer
-                                                    </DropdownMenuItem>
-                                                </DropdownMenuContent>
-                                            </DropdownMenu>
+                {activeAndFilteredVoters?.length === 0 ? (
+                    <NoDataContent 
+                        type="électeurs" 
+                        searchValue={searchValue}
+                    />
+                ) : (
+                    <div className="grid grid-cols-3 gap-4">
+                        {activeAndFilteredVoters?.map((voter) => (
+                            <Card key={voter.id} className="p-4 rounded-sm bg-secondary">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center space-x-4">
+                                        <div className="w-12 h-12 bg-secondary border-2 rounded-full flex items-center justify-center">
+                                            <span className="text-sm font-medium">
+                                                {voter.name.charAt(0).toUpperCase()}
+                                                {voter.last_name.charAt(0).toUpperCase()}
+                                            </span>
                                         </div>
-                                    </Card>
-                                ))}
-
-                                {isFetching && allVoters.length >= ITEMS_PER_PAGE && (
-                                    <div className="col-span-3 flex justify-center py-4">
-                                        <Loader />
+                                        <div>
+                                            <h4 className="font-medium">
+                                                {voter.name} {voter.last_name}
+                                            </h4>
+                                            <p className="text-sm text-gray-500">{voter.email}</p>
+                                        </div>
                                     </div>
-                                )}
-
-                                {allVoters.length >= ITEMS_PER_PAGE && (
-                                    <div ref={ref} className="col-span-3 h-1" />
-                                )}
-
-                                {!isFetching && 
-                                 page >= (voters?.totalPages || 0) && 
-                                 filteredVoters.length > 0 && 
-                                 allVoters.length >= ITEMS_PER_PAGE && (
-                                    <div className="col-span-3 text-center text-gray-500 py-4">
-                                        Plus d'électeurs à charger
-                                    </div>
-                                )}
-                            </div>
-                        )}
-                    </>
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                            <Button variant="ghost" className="h-8 w-8 p-0">
+                                                <MoreVertical className="h-4 w-4" />
+                                            </Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent align="end">
+                                            <DropdownMenuItem
+                                                className="text-red-600"
+                                                onClick={() => handleDelete(voter.id.toString())}
+                                            >
+                                                <Trash className="mr-2 h-4 w-4" />
+                                                Supprimer
+                                            </DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
+                                </div>
+                            </Card>
+                        ))}
+                    </div>
                 )}
             </div>
 

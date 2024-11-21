@@ -22,7 +22,7 @@ interface GetCandidatesParams {
 export const candidateApi = createApi({
     reducerPath: 'candidateApi',
     baseQuery: baseQueryWithAuth,
-    tagTypes: ['Candidates'],
+    tagTypes: ['Candidate', 'ElectionDetails'],
     endpoints: (builder) => ({
         // Get all candidates for an election with pagination
         getCandidatesByElection: builder.query<{
@@ -34,17 +34,20 @@ export const candidateApi = createApi({
         }, GetCandidatesParams>({
             query: ({ electionId, page, limit = 18 }) => 
                 `/candidat/get-all-candidat?id=${electionId}&page=${page}&limit=${limit}`,
-            providesTags: ['Candidates'],
+            providesTags: ['Candidate'],
         }),
         
         // Create a candidate
-        createCandidate: builder.mutation<void, { body: Partial<CandidateTypes>; electionId: string }>({
-            query: ({ body, electionId }) => ({
+        createCandidate: builder.mutation<any, { body: any, electionId: string }>({
+            query: ({body, electionId}) => ({
                 url: `candidat/create-candidat?id=${electionId}`,
                 method: 'POST',
                 body,
             }),
-            invalidatesTags: ['Candidates'],
+            invalidatesTags: (_result, _error, {electionId}) => [
+                {type: 'ElectionDetails', id: electionId},
+                'Candidate'
+            ],
         }),
         
         // Update a candidate
@@ -54,7 +57,7 @@ export const candidateApi = createApi({
                 method: 'PUT',
                 body,
             }),
-            invalidatesTags: ['Candidates'],
+            invalidatesTags: ['Candidate'],
         }),
         
         // Delete a candidate
@@ -63,7 +66,7 @@ export const candidateApi = createApi({
                 url: `candidat/delete-candidat?id=${id}`,
                 method: 'DELETE',
             }),
-            invalidatesTags: ['Candidates'],
+            invalidatesTags: ['ElectionDetails', 'Candidate'],
         }),
     }),
 });

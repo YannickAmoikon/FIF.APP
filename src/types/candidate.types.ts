@@ -6,6 +6,7 @@ export interface CandidateTypes {
     phone: string;
     birth_date: string;
     bio: string;
+    election_id: number
 }
 
 export interface CandidateResponse {

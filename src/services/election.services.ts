@@ -1,7 +1,7 @@
 // services/election.services.ts
 import {createApi, fetchBaseQuery} from '@reduxjs/toolkit/query/react';
 import {API_BASE_URL} from '@/config/api';
-import {CreateElectionDto,  ElectionResponse,  ElectionTypes} from "@/types/election.types";
+import {CreateElectionDto,  ElectionDetailResponse,  ElectionResponse,  ElectionTypes} from "@/types/election.types";
 
 // Créer un baseQuery personnalisé avec le token
 const baseQueryWithAuth = fetchBaseQuery({
@@ -15,10 +15,12 @@ const baseQueryWithAuth = fetchBaseQuery({
     },
 });
 
+
+
 export const electionApi = createApi({
     reducerPath: 'electionApi',
     baseQuery: baseQueryWithAuth,
-    tagTypes: ['Election'],
+    tagTypes: ['Election', 'ElectionDetails'],
     endpoints: (builder) => ({
         // Récupérer toutes les élections
         getElections: builder.query<{
@@ -33,9 +35,12 @@ export const electionApi = createApi({
         }),
 
         // Récupérer une élection par ID
-        getElectionById: builder.query<ElectionTypes, number>({
+        getElectionById: builder.query<ElectionDetailResponse, number>({
             query: (id) => `election/get-election?id=${id}`,
-            providesTags: (_result, _error, id) => [{type: 'Election', id}],
+            providesTags: (_result, _error, id) => [
+                {type: 'ElectionDetails', id},
+                'Election'
+            ],
         }),
 
         // Créer une nouvelle élection

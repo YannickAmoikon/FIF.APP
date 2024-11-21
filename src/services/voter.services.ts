@@ -22,7 +22,7 @@ interface GetVotersParams {
 export const voterApi = createApi({
     reducerPath: 'voterApi',
     baseQuery: baseQueryWithAuth,
-    tagTypes: ['Voters'],
+    tagTypes: ['Voter', 'ElectionDetails'],
     endpoints: (builder) => ({
         // Récupérer tous les électeurs d'une élection
         getVotersByElection: builder.query<{
@@ -34,17 +34,20 @@ export const voterApi = createApi({
         }, GetVotersParams>({
             query: ({ electionId, page, limit = 18 }) => 
                 `votant/get-all-votant?id=${electionId}&page=${page}&limit=${limit}`,
-            providesTags: ['Voters'],
+            providesTags: ['Voter'],
         }),
 
         // Créer un électeur
-        createVoter: builder.mutation<void, { body: Partial<VoterTypes>; electionId: string }>({
-            query: ({ body, electionId }) => ({
+        createVoter: builder.mutation<any, { body: any, electionId: string }>({
+            query: ({body, electionId}) => ({
                 url: `votant/create-votant?id=${electionId}`,
                 method: 'POST',
                 body,
             }),
-            invalidatesTags: ['Voters'],
+            invalidatesTags: (_result, _error, {electionId}) => [
+                {type: 'ElectionDetails', id: electionId},
+                'Voter'
+            ],
         }),
 
         // Mettre à jour un électeur
@@ -54,7 +57,7 @@ export const voterApi = createApi({
                 method: 'PUT',
                 body,
             }),
-            invalidatesTags: ['Voters'],
+            invalidatesTags: ['Voter'],
         }),
 
         // Supprimer un électeur
@@ -63,7 +66,7 @@ export const voterApi = createApi({
                 url: `votant/delete-votant?id=${id}`,
                 method: 'DELETE',
             }),
-            invalidatesTags: ['Voters'],
+            invalidatesTags: ['ElectionDetails', 'Voter'],
         }),
     }),
 });

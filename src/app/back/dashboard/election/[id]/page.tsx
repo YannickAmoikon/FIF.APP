@@ -25,6 +25,49 @@ const tabs = [
     {title: "résultats de l'élection", value: "results"}
 ];
 
+// Interface pour un candidat
+interface Candidate {
+    id: number;
+    name: string;
+    last_name: string;
+    is_active: boolean;
+    // ... autres propriétés des candidats si nécessaire
+}
+
+// Interface pour un électeur
+interface Voter {
+    id: number;
+    name: string;
+    last_name: string;
+    is_active: boolean;
+    // ... autres propriétés des électeurs si nécessaire
+}
+
+// Interface pour une élection
+interface Election {
+    id: number;
+    date_time_start: string;
+    date_time_end: string;
+    title: string;
+    description: string;
+    type_id: number;
+    statut: 'coming' | 'in progress' | 'finished';
+    type: 'Private' | 'Public' | 'Mixt';
+    created_at: string;
+    updated_at: string;
+    is_active: boolean;
+}
+
+// Interface pour la réponse de l'API
+interface ElectionDetailResponse {
+    message: string;
+    data: {
+        election: Election;
+        candidats: Candidate[];
+        votants: Voter[];
+    };
+}
+
 export default function ElectionDetailsPage() {
     const [isStartDialogOpen, setIsStartDialogOpen] = useState(false);
     const {toast} = useToast();
@@ -34,10 +77,10 @@ export default function ElectionDetailsPage() {
     const electionId = params?.id as string;
     const activeTab = searchParams.get('tab') || 'overview';
 
-    const {data: election, isLoading, isError} = useGetElectionByIdQuery(Number(electionId));
+    const {data: election, isLoading, isError} = useGetElectionByIdQuery<ElectionDetailResponse>(Number(electionId));
 
     const handleTabChange = (value: string) => {
-        router.push(`/dashboard/election/${electionId}?tab=${value}`);
+        router.push(`/back/dashboard/election/${electionId}?tab=${value}`);
     };
 
     const handleStartElection = () => {
@@ -48,6 +91,15 @@ export default function ElectionDetailsPage() {
         });
         setIsStartDialogOpen(false);
     };
+
+    // Calcul des totaux pour les candidats et électeurs actifs
+    const totalActiveCandidates = election?.data?.candidats?.filter(
+        candidate => candidate.is_active
+    ).length || 0;
+
+    const totalActiveVoters = election?.data?.votants?.filter(
+        voter => voter.is_active
+    ).length || 0;
 
     if (isLoading) {
         return (
@@ -79,7 +131,7 @@ export default function ElectionDetailsPage() {
             <Card className="flex-1 bg-secondary rounded-none shadow-none border-0">
                 <CardHeader className="border-b flex flex-row items-center justify-between py-4">
                     <div className="flex flex-col space-y-1.5">
-                        <CardTitle className="uppercase">{election?.data?.title}</CardTitle>
+                        <CardTitle className="uppercase">{election?.data?.election?.title}</CardTitle>
                         <CardDescription>Informations générales et statistiques</CardDescription>
                     </div>
                     <div className="flex items-center space-x-2">
@@ -112,22 +164,22 @@ export default function ElectionDetailsPage() {
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
                         <StatCard
                             title="Total candidats"
-                            value={election?.data?.total_candidates || "0"}
+                            value={totalActiveCandidates.toString()}
                             icon={<User size={24}/>}
                         />
                         <StatCard
                             title="Total électeurs"
-                            value={election?.data?.total_voters || "0"}
+                            value={totalActiveVoters.toString()}
                             icon={<Users size={24}/>}
                         />
                         <StatCard
                             title="Taux de progression des votes"
-                            value={`${election?.data?.vote_progress || 0} %`}
+                            value="0 %"
                             icon={<ChartLine size={24}/>}
                         />
                         <StatCard
                             title="Vainqueur de l'élection"
-                            value={election?.data?.winner || "Non déterminé"}
+                            value="Non déterminé"
                             icon={<UserCheck size={24}/>}
                         />
                     </div>
@@ -153,7 +205,7 @@ export default function ElectionDetailsPage() {
 
                             <div className="flex-1 bg-secondary">
                                 <TabsContent value="overview" className="h-full border overflow-auto m-0 p-8">
-                                    <ElectionDetailsOverViews election={election?.data}/>
+                                    <ElectionDetailsOverViews election={election?.data?.election}/>
                                 </TabsContent>
                                 <TabsContent value="candidates" className="h-full border overflow-auto m-0 p-8">
                                     <ElectionDetailsCandidates electionId={electionId}/>

@@ -9,12 +9,20 @@ interface ElectionDetailsOverViewsProps {
         date_time_start: string;
         date_time_end: string;
         statut: string;
+        type_id: number;
+        created_at: string;
+        updated_at: string;
+        is_active: boolean;
     };
 }
 
 export default function ElectionDetailsOverViews({ election }: ElectionDetailsOverViewsProps) {
-    // Fonction pour formater la date
+    if (!election) {
+        return null;
+    }
+
     const formatDate = (dateString: string) => {
+        if (!dateString) return "Non définie";
         const date = new Date(dateString);
         return date.toLocaleString('fr-FR', {
             year: 'numeric',
@@ -25,21 +33,15 @@ export default function ElectionDetailsOverViews({ election }: ElectionDetailsOv
         }).replace(',', '');
     };
 
-    // Fonction pour traduire le statut
-    const getStatus = (statut: string) => {
-        switch (statut) {
-            case 'coming':
-                return 'À venir';
-            case 'in_progress':
-                return 'En cours';
-            case 'ended':
-                return 'Terminé';
-            default:
-                return statut;
-        }
-    };
+    const formattedId = election?.id ? `EL${election.id.toString().padStart(3, '0')}` : 'N/A';
+    const title = election?.title || 'N/A';
+    const type = election?.type || 'N/A';
+    const description = election?.description || 'Aucune description';
+    const startDate = formatDate(election?.date_time_start);
+    const endDate = formatDate(election?.date_time_end);
+    const status = election?.statut || 'N/A';
 
-    return(
+    return (
         <ScrollArea className="h-full p-2">
             <div className="mb-6 flex flex-col">
                 <h3 className="font-semibold border-b pb-2">Informations générales</h3>
@@ -51,7 +53,7 @@ export default function ElectionDetailsOverViews({ election }: ElectionDetailsOv
                         <label className="text-sm text-gray-500">ID</label>
                         <input
                             type="text"
-                            value={`EL${election.id.toString().padStart(3, '0')}`}
+                            value={formattedId}
                             disabled
                             className="w-full px-3 py-2 bg-secondary border border-gray-200 rounded-sm text-gray-700 text-sm disabled:opacity-100"
                         />
@@ -60,7 +62,7 @@ export default function ElectionDetailsOverViews({ election }: ElectionDetailsOv
                         <label className="text-sm text-gray-500">Titre</label>
                         <input
                             type="text"
-                            value={election.title}
+                            value={title}
                             disabled
                             className="w-full px-3 py-2 bg-secondary border border-gray-200 rounded-sm text-gray-700 text-sm disabled:opacity-100"
                         />
@@ -69,7 +71,7 @@ export default function ElectionDetailsOverViews({ election }: ElectionDetailsOv
                         <label className="text-sm text-gray-500">Type</label>
                         <input
                             type="text"
-                            value={election.type === "Private" ? "Privé" : election.type === "Public" ? "Public" : "Mixte"}
+                            value={type}
                             disabled
                             className="w-full px-3 py-2 bg-secondary border border-gray-200 rounded-sm text-gray-700 text-sm disabled:opacity-100"
                         />
@@ -81,7 +83,7 @@ export default function ElectionDetailsOverViews({ election }: ElectionDetailsOv
                         <label className="text-sm text-gray-500">Date de début</label>
                         <input
                             type="text"
-                            value={formatDate(election.date_time_start)}
+                            value={startDate}
                             disabled
                             className="w-full px-3 py-2 bg-secondary border border-gray-200 rounded-sm text-gray-700 text-sm disabled:opacity-100"
                         />
@@ -90,7 +92,7 @@ export default function ElectionDetailsOverViews({ election }: ElectionDetailsOv
                         <label className="text-sm text-gray-500">Date de fin</label>
                         <input
                             type="text"
-                            value={formatDate(election.date_time_end)}
+                            value={endDate}
                             disabled
                             className="w-full px-3 py-2 bg-secondary border border-gray-200 rounded-sm text-gray-700 text-sm disabled:opacity-100"
                         />
@@ -99,7 +101,7 @@ export default function ElectionDetailsOverViews({ election }: ElectionDetailsOv
                         <label className="text-sm text-gray-500">Statut</label>
                         <input
                             type="text"
-                            value={getStatus(election.statut)}
+                            value={status}
                             disabled
                             className="w-full px-3 py-2 bg-secondary border border-gray-200 rounded-sm text-gray-700 text-sm disabled:opacity-100"
                         />
@@ -109,7 +111,7 @@ export default function ElectionDetailsOverViews({ election }: ElectionDetailsOv
                 <div className="space-y-2">
                     <label className="text-sm text-gray-500">Description</label>
                     <textarea
-                        value={election.description}
+                        value={description}
                         disabled
                         className="w-full h-32 px-3 py-2 bg-secondary border border-gray-200 rounded-sm text-gray-700 text-sm disabled:opacity-100 resize-none"
                     />

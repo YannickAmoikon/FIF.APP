@@ -8,10 +8,12 @@ import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
 import {Label} from "@/components/ui/label";
 import {useLoginMutation} from "@/services/auth.services";
+import {useToast} from "@/hooks/use-toast";
 
 export default function LoginForm() {
     const router = useRouter();
     const [login, {isLoading}] = useLoginMutation();
+    const {toast} = useToast();
 
     const [formData, setFormData] = useState({
         email: "",
@@ -30,42 +32,36 @@ export default function LoginForm() {
         e.preventDefault();
 
         try {
-            // Appel de l'API de connexion
             const response = await login({
                 email: formData.email,
                 password: formData.password,
             }).unwrap();
 
-            // Notification de succès
-            showToast({
+            // Stockage du token et des infos utilisateur
+            localStorage.setItem("token", response.token);
+            localStorage.setItem("user", JSON.stringify(response.user));
+
+            toast({
                 title: "Connexion réussie !",
                 description: "Vous allez être redirigé vers le dashboard.",
-                variant: "success",
+                className: "bg-green-600 text-white",
             });
 
-            // Redirection vers le dashboard
-            router.push("/dashboard");
+            // Redirection avec délai pour voir le toast
+            setTimeout(() => {
+                router.push("/back/dashboard");
+                router.refresh();
+            }, 1000);
 
         } catch (error: any) {
-            // Gestion des erreurs
-            showToast({
+            toast({
                 title: "Erreur de connexion",
-                description: error?.data?.message || "Une erreur est survenue",
-                variant: "error",
+                description: "Email ou mot de passe incorrect",
+                variant: "destructive",
             });
         }
     };
 
-    const [open, setOpen] = useState(false);
-
-    const showToast = (toast: {
-        title: string;
-        description: string;
-        variant: "success" | "error" | "default";
-    }) => {
-        setOpen(true);
-        setTimeout(() => setOpen(false), 3000);
-    };
     return (
         <div className="flex h-screen w-full overflow-hidden">
             <div className="hidden w-7/12 lg:block">
@@ -104,9 +100,11 @@ export default function LoginForm() {
                                     id="email"
                                     name="email"
                                     type="email"
+                                    placeholder="exemple@email.com"
                                     value={formData.email}
                                     onChange={handleInputChange}
                                     required
+                                    className="rounded-sm"
                                 />
                             </div>
                             <div className="grid gap-2">
@@ -117,12 +115,14 @@ export default function LoginForm() {
                                     id="password"
                                     name="password"
                                     type="password"
+                                    placeholder="Votre mot de passe"
                                     value={formData.password}
                                     onChange={handleInputChange}
                                     required
+                                    className="rounded-sm"
                                 />
                                 <Link
-                                    href="/forgot-password"
+                                    href="/back/forgot-password"
                                     className="ml-auto inline-block text-sm underline"
                                 >
                                     Mot de passe oublié ?
@@ -133,7 +133,7 @@ export default function LoginForm() {
                                     size="sm"
                                     type="submit"
                                     disabled={isLoading}
-                                    className="w-1/2 bg-green-600 rounded-sm text-md hover:bg-green-600"
+                                    className="w-1/2 bg-green-600 rounded-sm text-md hover:bg-green-700"
                                 >
                                     {isLoading ? "Connexion..." : "Connexion"}
                                 </Button>

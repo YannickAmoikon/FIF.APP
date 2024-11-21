@@ -1,4 +1,4 @@
-import { BookMarked, Users2, User } from "lucide-react";
+import { BookMarked, Users, User } from "lucide-react";
 
 interface NoDataContentProps {
     type: 'candidats' | 'électeurs' | 'élections';
@@ -11,7 +11,7 @@ export const NoDataContent = ({ type, searchValue }: NoDataContentProps) => {
             case 'candidats':
                 return User;
             case 'électeurs':
-                return Users2;
+                return Users;
             case 'élections':
                 return BookMarked;
             default:

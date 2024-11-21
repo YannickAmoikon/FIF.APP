@@ -18,14 +18,38 @@ import { Button } from '@/components/ui/button';
 import { Loader } from "@/components/app/Loader";
 import { NoDataContent } from '@/components/app/NoDataContent';
 
+// Interface pour une élection individuelle
+interface Election {
+    id: number;
+    date_time_start: string;
+    date_time_end: string;
+    title: string;
+    description: string;
+    type_id: number;
+    statut: 'coming' | 'in_progress' | 'ended';
+    type: 'Private' | 'Public' | 'Mixt';
+    created_at: string;
+    updated_at: string;
+    is_active: boolean;
+}
+
+// Interface pour la réponse de l'API
+interface ElectionResponse {
+    message: string;
+    data: Election[];
+    totalElections: number;
+    page: number;
+    totalPages: number;
+}
+
 export default function ElectionPage() {
     const [currentPage, setCurrentPage] = useState(1);
-    const { data, isLoading } = useGetElectionsQuery(currentPage);
+    const { data, isLoading } = useGetElectionsQuery<ElectionResponse>(currentPage);
     const [searchTerm, setSearchTerm] = useState("");
     const [activeFilter, setActiveFilter] = useState<string | null>(null);
     const {toast} = useToast();
 
-    const elections = data?.data || [];
+    const elections: Election[] = data?.data || [];
 
     const filterOptions = [
         {
@@ -79,9 +103,9 @@ export default function ElectionPage() {
                 ID: election.id,
                 Titre: election.title,
                 Type: election.type,
-                "Date de début": new Date(election.dateTimeStart).toLocaleString(),
-                "Date de fin": new Date(election.dateTimeEnd).toLocaleString(),
-                Statut: election.status,
+                "Date de début": new Date(election.date_time_start).toLocaleString(),
+                "Date de fin": new Date(election.date_time_end).toLocaleString(),
+                Statut: election.statut,
                 Description: election.description
             }));
 
@@ -115,9 +139,9 @@ export default function ElectionPage() {
                 election.id,
                 election.title,
                 election.type,
-                new Date(election.dateTimeStart).toLocaleString(),
-                new Date(election.dateTimeEnd).toLocaleString(),
-                election.status
+                new Date(election.date_time_start).toLocaleString(),
+                new Date(election.date_time_end).toLocaleString(),
+                election.statut
             ]);
 
             // @ts-ignore

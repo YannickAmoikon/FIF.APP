@@ -44,6 +44,7 @@ import {
 import { CandidateTypes } from "@/types/candidate.types";
 // Correction : Importation de NoDataContent depuis le bon emplacement
 import { NoDataContent } from '@/components/app/NoDataContent';
+import { useGetElectionByIdQuery } from "@/services/election.services";
 
 // Schéma de validation
 const formSchema = z.object({
@@ -74,21 +75,23 @@ const normalizeText = (text: string) => {
 export default function ElectionDetailsCandidates({
 	electionId,
 }: ElectionDetailsCandidatesProps) {
-	const [page, setPage] = useState(1);
-	const [allCandidates, setAllCandidates] = useState<CandidateType[]>([]);
 	const [isCreateOpen, setIsCreateOpen] = useState(false);
 	const [searchValue, setSearchValue] = useState("");
-	const { ref, inView } = useInView();
-	const { toast } = useToast();
+	const {toast} = useToast();
 	const [createCandidate] = useCreateCandidateMutation();
 	const [deleteCandidate] = useDeleteCandidateMutation();
-	const ITEMS_PER_PAGE = 18; // Nombre d'éléments par page
 
-	const { data: candidates, isLoading, isFetching } = useGetCandidatesByElectionQuery({
-		electionId,
-		page,
-		limit: ITEMS_PER_PAGE // Ajout du paramètre limit
-	});
+	// Récupération des données de l'élection avec le refetch
+	const {data: electionData, isLoading, refetch} = useGetElectionByIdQuery(Number(electionId));
+	
+	// Filtrer d'abord les candidats actifs, puis appliquer les autres filtres
+	const activeAndFilteredCandidates = electionData?.data?.candidats
+		?.filter(candidate => candidate.is_active) // Filtre des candidats actifs
+		?.filter((candidate) =>
+			`${candidate.name} ${candidate.last_name}`
+				.toLowerCase()
+				.includes(searchValue.toLowerCase())
+		) || [];
 
 	const form = useForm<FormValues>({
 		resolver: zodResolver(formSchema),
@@ -101,41 +104,24 @@ export default function ElectionDetailsCandidates({
 		},
 	});
 
-	// Gérer le scroll infini
-	useEffect(() => {
-		if (candidates?.data && !isFetching) {
-			if (page === 1) {
-				setAllCandidates(candidates.data);
-			} else {
-				setAllCandidates(prev => [...prev, ...candidates.data]);
-			}
-		}
-	}, [candidates?.data, isFetching]);
-
-	useEffect(() => {
-		if (inView && 
-			!isLoading && 
-			!isFetching && 
-			page < (candidates?.totalPages || 0) && 
-			allCandidates.length >= ITEMS_PER_PAGE) { // Vérification supplémentaire
-			setPage(prev => prev + 1);
-		}
-	}, [inView, isLoading, isFetching, candidates?.totalPages, allCandidates.length]);
-
 	const onSubmit = async (values: FormValues) => {
 		try {
 			await createCandidate({
 				body: {
 					...values,
-					birth_date: values.birth_date.toISOString().split('T')[0]
+					birth_date: values.birth_date.toISOString().split('T')[0],
+					election_id: Number(electionId)
 				},
 				electionId: electionId
 			}).unwrap();
 
+			// Refetch des données après la création
+			await refetch();
+
 			toast({
 				title: "Succès",
 				description: "Candidat créé avec succès",
-				className: "bg-green-600 text-white",
+					className: "bg-green-600 text-white",
 			});
 			setIsCreateOpen(false);
 			form.reset();
@@ -151,25 +137,23 @@ export default function ElectionDetailsCandidates({
 	const handleDelete = async (id: string) => {
 		try {
 			await deleteCandidate(id).unwrap();
+			
+			// Refetch des données après la suppression
+			await refetch();
+			
 			toast({
 				title: "Succès",
 				description: "Candidat supprimé avec succès",
 				className: "bg-green-600 text-white",
 			});
 		} catch (error) {
-			toast({
-				title: "Erreur",
-				description: "Impossible de supprimer le candidat",
-				variant: "destructive",
-			});
+				toast({
+					title: "Erreur",
+					description: "Impossible de supprimer le candidat",
+					variant: "destructive",
+				});
 		}
 	};
-
-	const filteredCandidates = allCandidates.filter((candidate) =>
-		`${candidate.name} ${candidate.last_name}`
-			.toLowerCase()
-			.includes(searchValue.toLowerCase()),
-	);
 
 	return (
 		<ScrollArea className="h-full p-2">
@@ -195,23 +179,23 @@ export default function ElectionDetailsCandidates({
 				</div>
 
 				{/* État de chargement initial */}
-				{isLoading && (
+				{!electionData && (
 					<div className="flex justify-center items-center py-8">
 						<Loader />
 					</div>
 				)}
 
-				{/* Affichage des candidats ou message d'erreur */}
-				{!isLoading && (
+				{/* Affichage des candidats */}
+				{electionData && (
 					<>
-						{filteredCandidates?.length === 0 ? (
+						{activeAndFilteredCandidates.length === 0 ? (
 							<NoDataContent 
 								type="candidats" 
 								searchValue={searchValue}
 							/>
 						) : (
 							<div className="grid grid-cols-3 gap-4">
-								{filteredCandidates?.map((candidate) => (
+								{activeAndFilteredCandidates.map((candidate) => (
 									<Card key={candidate.id} className="p-4 rounded-sm bg-secondary">
 										<div className="flex items-center justify-between">
 											<div className="flex items-center space-x-4">
@@ -247,28 +231,6 @@ export default function ElectionDetailsCandidates({
 										</div>
 									</Card>
 								))}
-
-								{/* Loader pour le scroll infini (uniquement si plus de 18 éléments) */}
-								{isFetching && allCandidates.length >= ITEMS_PER_PAGE && (
-									<div className="col-span-3 flex justify-center py-4">
-										<Loader />
-									</div>
-								)}
-
-								{/* Element de référence pour l'intersection observer (uniquement si plus de 18 éléments) */}
-								{allCandidates.length >= ITEMS_PER_PAGE && (
-									<div ref={ref} className="col-span-3 h-1" />
-								)}
-
-								{/* Message quand il n'y a plus de données */}
-								{!isFetching && 
-								 page >= (candidates?.totalPages || 0) && 
-								 filteredCandidates.length > 0 && 
-								 allCandidates.length >= ITEMS_PER_PAGE && (
-									<div className="col-span-3 text-center text-gray-500 py-4">
-										Plus de candidats à charger
-									</div>
-								)}
 							</div>
 						)}
 					</>

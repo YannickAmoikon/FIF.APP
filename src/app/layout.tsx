@@ -1,9 +1,8 @@
 "use client";
 
-import "../styles/globals.css";
+import "@/styles/globals.css";
 import LocalFont from 'next/font/local'
 import {Providers} from "@/components/providers/providers";
-import React from "react";
 
 const font = LocalFont({
     src: '../fonts/GeistVF.woff',
