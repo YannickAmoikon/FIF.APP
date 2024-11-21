@@ -75,7 +75,7 @@ export default function VoteForm() {
                     name: "Konan Mathurin",
                     role: "Candidat",
                     bio: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-                    image: "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix&backgroundColor=b6e3f4",
+                    image: "/1.png",
                     votes_percentage: 60
                 },
                 {
@@ -83,7 +83,7 @@ export default function VoteForm() {
                     name: "Cissé Sekou D",
                     role: "Candidat",
                     bio: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-                    image: "https://api.dicebear.com/7.x/avataaars/svg?seed=John&backgroundColor=ffdfbf",
+                    image: "/2.png",
                     votes_percentage: 40
                 }
             ]
