@@ -240,10 +240,10 @@ export default function ElectionDetailsPage() {
                             Confirmation de démarrage
                         </DialogTitle>
                         <DialogDescription className="pt-2 space-y-2">
-                            <p>
+                            <div>
                                 Êtes-vous sûr de vouloir démarrer cette élection ?
                                 Cette action permettra aux électeurs de commencer à voter.
-                            </p>
+                            </div>
                             <div className="bg-orange-50 p-3 rounded-sm text-sm text-orange-800 mt-2">
                                 <strong>Attention :</strong> Une fois l'élection démarrée,
                                 certains paramètres ne pourront plus être modifiés.
