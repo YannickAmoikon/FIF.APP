@@ -152,7 +152,7 @@ export default function ElectionDetailsPage() {
                             size="sm"
                             variant="secondary"
                             className="border rounded-sm"
-                            onClick={() => router.push('/dashboard/election')}
+                            onClick={() => router.push('/back/dashboard/election')}
                         >
                             <ArrowLeft className="mr-1" size={14}/>
                             Retour

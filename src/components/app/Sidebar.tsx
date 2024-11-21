@@ -33,12 +33,6 @@ export default function SideBar({className = ""}: { className?: string }) {
             localStorage.removeItem("token");
             localStorage.removeItem("user");
 
-            toast({
-                title: "Déconnexion réussie",
-                description: "Vous allez être redirigé vers la page de connexion.",
-                className: "bg-green-600 text-white",
-            });
-
             // Redirection avec délai pour voir le toast
             setTimeout(() => {
                 router.push("/back/login");

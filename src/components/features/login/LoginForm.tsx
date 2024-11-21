@@ -9,6 +9,7 @@ import {Input} from "@/components/ui/input";
 import {Label} from "@/components/ui/label";
 import {useLoginMutation} from "@/services/auth.services";
 import {useToast} from "@/hooks/use-toast";
+import { ChevronsRight } from "lucide-react";
 
 export default function LoginForm() {
     const router = useRouter();
@@ -40,12 +41,6 @@ export default function LoginForm() {
             // Stockage du token et des infos utilisateur
             localStorage.setItem("token", response.token);
             localStorage.setItem("user", JSON.stringify(response.user));
-
-            toast({
-                title: "Connexion réussie !",
-                description: "Vous allez être redirigé vers le dashboard.",
-                className: "bg-green-600 text-white",
-            });
 
             // Redirection avec délai pour voir le toast
             setTimeout(() => {
@@ -135,6 +130,7 @@ export default function LoginForm() {
                                     disabled={isLoading}
                                     className="w-1/2 bg-green-600 rounded-sm text-md hover:bg-green-700"
                                 >
+                                    <ChevronsRight className="w-5 h-5 mr-1"/>
                                     {isLoading ? "Connexion..." : "Connexion"}
                                 </Button>
                             </div>
