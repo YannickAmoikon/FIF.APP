@@ -80,6 +80,14 @@ export default function VoteForm() {
                 },
                 {
                     id: 2,
+                    name: "Neutre",
+                    role: "Candidat",
+                    bio: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+                    image: "",
+                    votes_percentage: 20
+                },
+                {
+                    id: 3,
                     name: "Cissé Sekou D",
                     role: "Candidat",
                     bio: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",

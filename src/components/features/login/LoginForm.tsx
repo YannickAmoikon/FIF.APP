@@ -9,7 +9,7 @@ import {Input} from "@/components/ui/input";
 import {Label} from "@/components/ui/label";
 import {useLoginMutation} from "@/services/auth.services";
 import {useToast} from "@/hooks/use-toast";
-import { ChevronsRight } from "lucide-react";
+import {ChevronsRight, Loader} from "lucide-react";
 
 export default function LoginForm() {
     const router = useRouter();
@@ -129,9 +129,11 @@ export default function LoginForm() {
                                     type="submit"
                                     disabled={isLoading}
                                     className="w-1/2 bg-green-600 rounded-sm text-md hover:bg-green-700"
+                                    aria-disabled={isLoading}
                                 >
-                                    <ChevronsRight className="w-5 h-5 mr-1"/>
-                                    {isLoading ? "Connexion..." : "Connexion"}
+                                    {isLoading ? <Loader className="animate-spin w-5 h-5 mr-1"/> :
+                                        <ChevronsRight className="w-5 h-5 mr-1"/>}
+                                    Connexion
                                 </Button>
                             </div>
                         </div>

@@ -9,7 +9,7 @@ import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
 import {AlertTriangle, ArrowLeft, ChartLine, Check, MoreVertical, ThumbsUp, User, UserCheck, Users} from "lucide-react";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
 import {Button} from "@/components/ui/button";
-import {Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle} from "@/components/ui/dialog";
+import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import {useToast} from "@/hooks/use-toast";
 import {useParams, useRouter, useSearchParams} from "next/navigation";
 import ElectionDetailsOverViews from "@/components/features/electionDetails/ElectionDetailsOverViews";
@@ -110,7 +110,7 @@ export default function ElectionDetailsPage() {
             <main className="flex bg-secondary flex-1 h-full">
                 <Card className="flex-1 bg-secondary rounded-none shadow-none border-0">
                     <CardContent className="h-full flex items-center justify-center">
-                        <Loader />
+                        <Loader/>
                     </CardContent>
                 </Card>
             </main>
@@ -133,11 +133,12 @@ export default function ElectionDetailsPage() {
         <main className="flex bg-secondary flex-1 h-full">
             <Toaster/>
             <Card className="flex-1 bg-secondary rounded-none shadow-none border-0">
-                <CardHeader className="border-b flex flex-row items-center justify-between py-4">
+                <CardHeader className="border-b-2 flex flex-row items-center justify-between p-6">
                     <div className="flex flex-col space-y-1.5">
                         <CardTitle className="uppercase">{
                             //@ts-ignore
-                        election?.data?.election?.title}</CardTitle>
+                            election?.data?.election?.title}
+                        </CardTitle>
                         <CardDescription>Informations générales et statistiques</CardDescription>
                     </div>
                     <div className="flex items-center space-x-2">
@@ -166,7 +167,7 @@ export default function ElectionDetailsPage() {
                     </div>
                 </CardHeader>
 
-                <CardContent className="p-4 h-[calc(100vh-6rem)] flex flex-col">
+                <CardContent className="p-4 h-[calc(100vh-7rem)] flex flex-col">
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
                         <StatCard
                             title="Total candidats"
@@ -191,13 +192,14 @@ export default function ElectionDetailsPage() {
                     </div>
 
                     <div className="flex-1 flex flex-col min-h-0">
-                        <Tabs 
-                            defaultValue={activeTab} 
+                        <Tabs
+                            defaultValue={activeTab}
                             value={activeTab}
                             onValueChange={handleTabChange}
                             className="flex-1 flex border rounded-sm flex-col"
                         >
-                            <TabsList className="space-x-2 w-full flex items-center rounded-sm justify-start py-5 border-b border-gray-200">
+                            <TabsList
+                                className="space-x-2 w-full flex items-center rounded-sm justify-start py-5 border-b border-gray-200">
                                 {tabs.map((tab) => (
                                     <TabsTrigger
                                         key={tab.value}
@@ -223,8 +225,8 @@ export default function ElectionDetailsPage() {
                                 </TabsContent>
                                 <TabsContent value="results" className="h-full border overflow-auto m-0 p-8">
                                     <ElectionDetailsResults
-                                    //@ts-ignore
-                                     electionId={electionId}/>
+                                        //@ts-ignore
+                                        electionId={electionId}/>
                                 </TabsContent>
                             </div>
                         </Tabs>
@@ -239,16 +241,19 @@ export default function ElectionDetailsPage() {
                             <AlertTriangle className="h-5 w-5 text-orange-500"/>
                             Confirmation de démarrage
                         </DialogTitle>
-                        <DialogDescription className="pt-2 space-y-2">
+                        <div className="pt-2 space-y-2">
                             <div>
-                                Êtes-vous sûr de vouloir démarrer cette élection ?
-                                Cette action permettra aux électeurs de commencer à voter.
+                                <h1>
+                                    Êtes-vous sûr de vouloir démarrer cette élection ?
+                                    Cette action permettra aux électeurs de commencer à voter.
+                                </h1>
                             </div>
-                            <div className="bg-orange-50 p-3 rounded-sm text-sm text-orange-800 mt-2">
+                            <p className="bg-orange-50 p-3 rounded-sm text-sm text-orange-800 mt-2">
                                 <strong>Attention :</strong> Une fois l'élection démarrée,
                                 certains paramètres ne pourront plus être modifiés.
-                            </div>
-                        </DialogDescription>
+                            </p>
+                        </div>
+
                     </DialogHeader>
                     <DialogFooter>
                         <Button

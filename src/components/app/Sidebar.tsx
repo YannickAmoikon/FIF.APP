@@ -4,14 +4,23 @@ import React, {useState} from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {usePathname, useRouter} from "next/navigation";
-import {AlertTriangle, BookMarked, Check, Info, LayoutDashboard, LogOut} from "lucide-react";
-import {Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle} from "@/components/ui/dialog";
+import {AlertTriangle, BookMarked, Check, Info, LayoutDashboard, LogOut, Medal} from "lucide-react";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle
+} from "@/components/ui/dialog";
 import {Button} from "@/components/ui/button";
 import {useToast} from "@/hooks/use-toast";
 
 const items = [
     {title: "Tableau de bord", url: "/back/dashboard", icon: LayoutDashboard},
     {title: "Élections", url: "/back/dashboard/election", icon: BookMarked},
+    {title: "Sondages", url: "/back/dashboard/poll", icon: Medal},
+
 ];
 
 export default function SideBar({className = ""}: { className?: string }) {
@@ -22,8 +31,8 @@ export default function SideBar({className = ""}: { className?: string }) {
 
     const isActive = (url: string) => {
         // Correspondance exacte pour le tableau de bord, préfixe pour les autres routes
-        return pathname === url || 
-               (url !== "/back/dashboard" && pathname.startsWith(url));
+        return pathname === url ||
+            (url !== "/back/dashboard" && pathname.startsWith(url));
     };
 
     const handleLogout = async () => {
@@ -51,8 +60,8 @@ export default function SideBar({className = ""}: { className?: string }) {
             href={item.url}
             className={`flex rounded-sm text-sm items-center gap-3 px-3 py-2.5 transition-all
                 ${isActive(item.url)
-                    ? "bg-white text-orange-500 font-semibold"
-                    : "text-white hover:bg-orange-300 hover:text-white"
+                ? "bg-white text-orange-500 font-semibold"
+                : "text-white hover:bg-orange-400 hover:text-white"
             }`}
         >
             <item.icon className="h-5 w-5"/>
@@ -62,18 +71,27 @@ export default function SideBar({className = ""}: { className?: string }) {
 
     return (
         <>
-            <aside className={`bg-orange-400 text-gray-900 w-64 min-h-screen flex-col shadow-lg hidden md:flex border-r ${className}`}>
-                <div className="flex h-20 space-x-1.5 items-center justify-center px-3 border-b bg-orange-400">
-                    <Image
-                        src="/logo.png"
-                        alt="Logo FIF"
-                        width={38}
-                        height={38}
-                        className="rounded-sm bg-white p-1"
-                        priority
-                    />
-                    <div>
-                        <h1 className="text-sm font-bold text-white">FEDERATION <br/> IVOIRIENNE DE FOOTBALL</h1>
+            <aside
+                className={`bg-orange-500 text-gray-900 w-64 min-h-screen flex-col shadow-lg hidden md:flex border-r ${className}`}>
+                <div
+                    className="h-[107px] flex items-center justify-between px-6 border-b-2 border-white/40 bg-orange-500">
+                    <div className="flex items-center space-x-4">
+                        <Image
+                            src="/logo.png"
+                            alt="Logo FIF"
+                            width={75}
+                            height={75}
+                            className="rounded-md bg-white p-1 cursor-pointer shadow-md transform transition-transform hover:scale-105"
+                            priority
+                        />
+                        <div className="cursor-pointer">
+                            <h1 className="text-white text-xl font-black uppercase tracking-wider leading-tight">
+                                FIF
+                            </h1>
+                            <p className="text-white text-xs font-medium tracking-wide">
+                                Fédération Ivoirienne de Football
+                            </p>
+                        </div>
                     </div>
                 </div>
 
@@ -85,13 +103,13 @@ export default function SideBar({className = ""}: { className?: string }) {
                     </div>
                 </nav>
 
-                <div className="p-4 border-t-2">
+                <div className="p-4">
                     <Link
                         href="/back/dashboard/help"
                         className={`flex rounded-sm text-sm items-center gap-3 px-3 py-2.5 transition-all
                             ${isActive("/back/dashboard/help")
-                                ? "bg-white text-orange-500 font-semibold"
-                                : "text-white hover:bg-orange-300 hover:text-white"
+                            ? "bg-white text-orange-500 font-semibold"
+                            : "text-white hover:bg-orange-300 hover:text-white"
                         }`}
                     >
                         <Info className="h-5 w-5"/>
@@ -99,7 +117,7 @@ export default function SideBar({className = ""}: { className?: string }) {
                     </Link>
                     <button
                         onClick={() => setIsLogoutDialogOpen(true)}
-                        className="flex rounded-sm text-sm items-center gap-3 px-3 py-2.5 text-white hover:bg-orange-300 hover:text-white transition-all w-full mt-2"
+                        className="flex rounded-sm text-sm items-center gap-3 px-3 py-2.5 text-white hover:bg-orange-400 hover:text-white transition-all w-full mt-2"
                     >
                         <LogOut className="h-5 w-5"/>
                         <span>Déconnexion</span>

@@ -18,11 +18,10 @@ import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger
 import {FilePenLine, Loader, MoreHorizontal, Settings2, Trash} from "lucide-react";
 import {Badge} from "@/components/ui/badge";
 import Link from "next/link";
-import {useDeleteElectionMutation} from "@/services/election.services";
 import {useToast} from "@/hooks/use-toast";
 
-// Interface pour une élection individuelle
-interface Election {
+// Interface pour un sondage individuel
+interface Poll {
     id: number;
     date_time_start: string;
     date_time_end: string;
@@ -36,8 +35,8 @@ interface Election {
     is_active: boolean;
 }
 
-interface ElectionRowProps {
-    elections: Election[];
+interface PollRowProps {
+    polls: Poll[];
 }
 
 const getStatusBadge = (status: string) => {
@@ -49,23 +48,22 @@ const getStatusBadge = (status: string) => {
     return statusStyles[status as keyof typeof statusStyles];
 };
 
-export const ElectionRow: React.FC<ElectionRowProps> = ({elections = []}) => {
-    const [deleteElection] = useDeleteElectionMutation();
+export const PollRow: React.FC<PollRowProps> = ({polls = []}) => {
     const {toast} = useToast();
 
     const handleDelete = async (id: string) => {
         try {
-            await deleteElection(Number(id)).unwrap();
+            // Placeholder for delete logic
             toast({
                 title: "Succès",
-                description: "Élection supprimée avec succès",
-                className: "bg-green-600 text-white",
+                description: "Sondage supprimé avec succès",
+                className: "bg-green-600",
             });
         } catch (error) {
             console.error('Erreur lors de la suppression', error);
             toast({
                 title: "Erreur",
-                description: "Erreur lors de la suppression de l'élection",
+                description: "Erreur lors de la suppression du sondage",
                 variant: "destructive",
             });
         }
@@ -82,41 +80,40 @@ export const ElectionRow: React.FC<ElectionRowProps> = ({elections = []}) => {
         });
     };
 
-    // Vérifier si elections existe et n'est pas vide
-    if (!elections || elections.length === 0) {
+    if (!polls || polls.length === 0) {
         return null;
     }
 
     return (
         <>
-            {elections.map((election) => (
-                <TableRow key={election.id}>
-                    <TableCell className="text-left w-[10%]">{election.id}</TableCell>
-                    <TableCell className="text-left font-medium w-[30%]">{election.title}</TableCell>
+            {polls.map((poll) => (
+                <TableRow key={poll.id}>
+                    <TableCell className="text-left w-[10%]">{poll.id}</TableCell>
+                    <TableCell className="text-left font-medium w-[30%]">{poll.title}</TableCell>
                     <TableCell className="text-left w-[10%]">
-                        {election.type === "Private" ? "Privé" :
-                            election.type === "Public" ? "Public" :
-                                election.type === "Mixt" ? "Mixte" : election.type}
+                        {poll.type === "Private" ? "Privé" :
+                            poll.type === "Public" ? "Public" :
+                                poll.type === "Mixt" ? "Mixte" : poll.type}
                     </TableCell>
                     <TableCell className="text-left w-[15%]">
-                        {formatDate(election.date_time_start)}
+                        {formatDate(poll.date_time_start)}
                     </TableCell>
                     <TableCell className="text-left w-[15%]">
-                        {formatDate(election.date_time_end)}
+                        {formatDate(poll.date_time_end)}
                     </TableCell>
                     <TableCell className="text-center w-[10%]">
                         <Badge
                             variant="secondary"
-                            className={`${getStatusBadge(election.statut)} rounded-sm cursor-pointer`}
+                            className={`${getStatusBadge(poll.statut)} rounded-sm cursor-pointer`}
                         >
-                            {election.statut === 'coming' ? 'À venir' :
-                                election.statut === 'in progress' ? (
+                            {poll.statut === 'coming' ? 'À venir' :
+                                poll.statut === 'in progress' ? (
                                         <div className="flex items-center justify-center">
                                             <Loader className="mr-1 h-4 w-4 animate-spin"/>
                                             En cours
                                         </div>
                                     ) :
-                                    election.statut === 'finished' ? 'Terminé' : election.statut}
+                                    poll.statut === 'finished' ? 'Terminé' : poll.statut}
                         </Badge>
                     </TableCell>
                     <TableCell className="text-right w-[10%]">
@@ -132,7 +129,7 @@ export const ElectionRow: React.FC<ElectionRowProps> = ({elections = []}) => {
                                     Modifier
                                 </DropdownMenuItem>
                                 <Link
-                                    href={`/back/dashboard/election/${election.id}?title=${election.title}&status=${election.statut}`}>
+                                    href={`/back/dashboard/poll/${poll.id}?title=${poll.title}&status=${poll.statut}`}>
                                     <DropdownMenuItem>
                                         <Settings2 className="mr-1" size={14}/>
                                         Organiser
@@ -152,15 +149,15 @@ export const ElectionRow: React.FC<ElectionRowProps> = ({elections = []}) => {
                                         <AlertDialogHeader>
                                             <AlertDialogTitle>Êtes-vous sûr ?</AlertDialogTitle>
                                             <AlertDialogDescription>
-                                                Cette action est irréversible. Cela supprimera définitivement l'élection
-                                                "{election.title}" et toutes les données associées.
+                                                Cette action est irréversible. Cela supprimera définitivement le sondage
+                                                "{poll.title}" et toutes les données associées.
                                             </AlertDialogDescription>
                                         </AlertDialogHeader>
                                         <AlertDialogFooter>
                                             <AlertDialogCancel>Annuler</AlertDialogCancel>
                                             <AlertDialogAction
                                                 className="bg-red-600 hover:bg-red-700"
-                                                onClick={() => handleDelete(election.id.toString())}
+                                                onClick={() => handleDelete(poll.id.toString())}
                                             >
                                                 Supprimer
                                             </AlertDialogAction>

@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button"
+import {Button} from "@/components/ui/button"
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -6,7 +6,6 @@ import {
     DropdownMenuItem,
     DropdownMenuLabel,
     DropdownMenuSeparator,
-    DropdownMenuShortcut,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import {ListFilter} from "lucide-react";
@@ -19,20 +18,20 @@ interface FilterButtonProps {
     }[];
 }
 
-export default function FilterButton({ 
-    options, 
-    label = "Filtrer par" 
-}: FilterButtonProps & { label?: string }) {
+export default function FilterButton({
+                                         options,
+                                         label = "Filtrer par"
+                                     }: FilterButtonProps & { label?: string }) {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <Button size="sm" className="rounded-sm border" variant="secondary">
-                    <ListFilter className="mr-1" size={14} /> Filtrer
+                    <ListFilter className="mr-1" size={14}/> Filtrer
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-36">
                 <DropdownMenuLabel>{label}</DropdownMenuLabel>
-                <DropdownMenuSeparator />
+                <DropdownMenuSeparator/>
                 <DropdownMenuGroup>
                     {options.map((option, index) => (
                         <DropdownMenuItem key={index} onClick={option.onClick}>
