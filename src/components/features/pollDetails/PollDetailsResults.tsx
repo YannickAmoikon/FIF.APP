@@ -2,7 +2,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { FileDown } from "lucide-react";
 
-export default function ElectionDetailsResults() {
+export default function PollDetailsResults() {
   const totalVotes = 250;
   const votesDetails = {
     votesValides: 230,
@@ -17,11 +17,18 @@ export default function ElectionDetailsResults() {
       </div>
 
       <div className="space-y-6">
+        <div className="flex justify-end items-center">
+          <Button size="sm" variant="secondary" className="rounded-sm border">
+            <FileDown className="mr-1 w-5 h-5" />
+            Exporter les résultats
+          </Button>
+        </div>
+
         <div className="space-y-4">
           {[
-            { name: "AMOIKON Yannick", votes: 120, percentage: 48 },
-            { name: "N'GUESSAN Franck", votes: 85, percentage: 34 },
-            { name: "AMOIKON Eric", votes: 45, percentage: 18 },
+            { name: "Oui / Pour", votes: 120, percentage: 48 },
+            { name: "Non / Contre", votes: 85, percentage: 34 },
+            { name: "Neutre / Je m'abstiens", votes: 45, percentage: 18 },
           ].map((candidat) => (
             <div key={candidat.name} className="space-y-2">
               <div className="flex justify-between text-sm">
@@ -46,12 +53,6 @@ export default function ElectionDetailsResults() {
               </div>
             </div>
           ))}
-          <div className="flex justify-end items-center">
-            <Button size="sm" variant="secondary" className="rounded-sm border">
-              <FileDown className="mr-1 w-5 h-5" />
-              Exporter les résultats
-            </Button>
-          </div>
         </div>
 
         <div className="pt-4 border-t">
